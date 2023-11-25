@@ -1,5 +1,6 @@
 package org.hackathon.buss.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hackathon.buss.enums.Role;
@@ -27,6 +28,7 @@ public class User implements UserDetails {
 
     private String surname;
 
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)

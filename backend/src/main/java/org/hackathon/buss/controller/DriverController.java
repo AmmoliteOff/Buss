@@ -2,7 +2,6 @@ package org.hackathon.buss.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.model.Bus;
-import org.hackathon.buss.model.User;
 import org.hackathon.buss.service.StatsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

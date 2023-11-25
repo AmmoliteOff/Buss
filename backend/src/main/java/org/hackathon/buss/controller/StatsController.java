@@ -1,10 +1,8 @@
 package org.hackathon.buss.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.hackathon.buss.model.Bus;
 import org.hackathon.buss.model.stats.BusStationStats;
 import org.hackathon.buss.repository.BusStationsStatsRepository;
-import org.hackathon.buss.service.BusService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
