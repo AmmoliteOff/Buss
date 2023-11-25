@@ -1,10 +1,14 @@
 package org.hackathon.buss.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
+import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.repository.RouteRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +17,7 @@ import java.util.Optional;
 public class RouteService {
 
     private final RouteRepository routeRepository;
-
+    private final RouteChangeService routeChangeService;
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
@@ -23,6 +27,7 @@ public class RouteService {
     }
 
     public Route save(Route route) {
+        route.setChanges(new ArrayList<>());
         return routeRepository.save(route);
     }
 
@@ -30,8 +35,14 @@ public class RouteService {
         routeRepository.delete(findById(id).orElseThrow());
     }
 
-    public Route update(Long id, Route newRoute) {
-        newRoute.setId(id);
-        return save(newRoute);
+    public Route update(Long id, RouteChangeDTO routeChangeDTO) {
+        Route route = routeChangeDTO.getRoute();
+        route.setId(id);
+        RouteChange routeChange = new RouteChange();
+        routeChange.setTime(LocalDateTime.now());
+        routeChange.setReason(routeChangeDTO.getReason());
+        routeChange.setRoute(route);
+        route.getChanges().add(routeChange);
+        return save(route);
     }
 }
