@@ -23,8 +23,4 @@ public class BusStation {
     private int posX;
 
     private int posY;
-
-    private int peopleCount;
-
-    private int lastBusPeopleCount;
 }
