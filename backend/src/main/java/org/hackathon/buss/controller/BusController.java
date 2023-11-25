@@ -32,6 +32,11 @@ public class BusController {
         return ResponseEntity.ok(busService.save(bus));
     }
 
+    @PatchMapping("/{id}")
+    public  ResponseEntity<Bus> updateBus(@PathVariable Long id, @RequestBody Bus bus) {
+        return ResponseEntity.ok(busService.update(id, bus));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Bus> deleteBus(@PathVariable Long id) {
         busService.delete(id);
