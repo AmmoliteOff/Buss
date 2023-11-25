@@ -18,7 +18,8 @@ import java.util.Map;
 @Table(name = "schedules")
 public class Schedule {
     @Id
-    long scheduleId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long scheduleId;
 
     @OneToOne
     private Bus bus;

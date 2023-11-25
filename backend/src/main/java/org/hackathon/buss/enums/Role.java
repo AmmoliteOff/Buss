@@ -2,7 +2,7 @@ package org.hackathon.buss.enums;
 
 public enum Role {
 
-    BUS_DRIVER,
+    DRIVER,
 
     DISPATCHER,
 
