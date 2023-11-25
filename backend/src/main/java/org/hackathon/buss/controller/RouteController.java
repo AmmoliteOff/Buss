@@ -1,6 +1,7 @@
 package org.hackathon.buss.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.service.RouteService;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class RouteController {
     private final RouteService routeService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Route> getBus(@PathVariable Long id) {
+    public ResponseEntity<Route> getRoute(@PathVariable Long id) {
         Route route = routeService.findById(id).orElse(null);
         return ResponseEntity.ok(route);
     }
@@ -33,8 +34,8 @@ public class RouteController {
     }
 
     @PatchMapping("/{id}")
-    public  ResponseEntity<Route> updateRoute(@PathVariable Long id, @RequestBody Route route) {
-        return ResponseEntity.ok(routeService.update(id, route));
+    public  ResponseEntity<Route> updateRoute(@PathVariable Long id, @RequestBody RouteChangeDTO routeChangeDTO) {
+        return ResponseEntity.ok(routeService.update(id, routeChangeDTO));
     }
 
     @DeleteMapping("/{id}")
