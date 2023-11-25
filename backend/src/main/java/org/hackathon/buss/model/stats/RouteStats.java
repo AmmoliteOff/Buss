@@ -6,7 +6,5 @@ import jakarta.persistence.Id;
 @Entity
 public class RouteStats {
     @Id
-    long routeStatsId;
-
-
+    Long routeStatsId;
 }

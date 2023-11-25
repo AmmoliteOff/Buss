@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "route_сhanges")
-public class RouteChanges {
+public class RouteChange {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

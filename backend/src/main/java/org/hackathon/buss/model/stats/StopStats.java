@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Data
 @Entity
-public class BusStationStats {
+public class StopStats {
     @Id
     private long busStationStatsId;
 

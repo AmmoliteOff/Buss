@@ -27,9 +27,13 @@ public class Route {
     @OneToMany
     private List<Stop> stops;
 
-    @OneToMany
+    @Transient
     private List<Bus> buses;
 
     @OneToMany
     private List<Schedule> schedules;
+
+    @Transient
+//    @OneToMany(mappedBy = "route", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<RouteChange> changes;
 }

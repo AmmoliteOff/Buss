@@ -22,7 +22,7 @@ public class Bus {
 
     private double charge;
 
-    @OneToOne
+    @ManyToOne
     private Route route;
 
     @OneToOne
