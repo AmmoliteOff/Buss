@@ -16,8 +16,8 @@ public class BusController {
     private final BusService busService;
 
     @GetMapping()
-    public ResponseEntity<Bus> getBus() {
-        Bus bus = busService.findBus(1).orElse(null);
+    public ResponseEntity<Bus> getBus(long busId) {
+        Bus bus = busService.findBus(busId).orElse(null);
         return ResponseEntity.ok(bus);
     }
 }

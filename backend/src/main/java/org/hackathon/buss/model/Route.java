@@ -22,7 +22,14 @@ public class Route {
 
     private String title;
 
+    private double loadFactor;
+
     @OneToMany
     private List<BusStation> busStations;
 
+    @OneToMany
+    private List<Bus> buses;
+
+    @OneToMany
+    private List<Schedule> schedules;
 }

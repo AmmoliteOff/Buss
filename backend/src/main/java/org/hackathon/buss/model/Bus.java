@@ -28,6 +28,9 @@ public class Bus {
     @OneToOne
     private User busDriver;
 
+    @OneToOne
+    private Schedule schedule;
+
     private int posX;
 
     private int posY;
