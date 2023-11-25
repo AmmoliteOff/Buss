@@ -21,8 +21,9 @@ public class Schedule {
     long scheduleId;
 
     @OneToOne
-    Bus bus;
+    private Bus bus;
 
+    @Transient
     @OneToMany
-    List<ScheduleEntry> schedule;
+    private List<ScheduleEntry> scheduleEntries;
 }
