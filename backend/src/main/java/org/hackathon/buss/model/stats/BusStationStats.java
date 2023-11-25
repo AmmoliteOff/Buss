@@ -2,7 +2,7 @@ package org.hackathon.buss.model.stats;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hackathon.buss.model.BusStation;
+import org.hackathon.buss.model.Stop;
 
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public class BusStationStats {
     private long busStationStatsId;
 
     @OneToOne
-    BusStation busStation;
+    Stop stop;
 
     private int peopleCount;
 

@@ -25,7 +25,7 @@ public class Route {
     private double loadFactor;
 
     @OneToMany
-    private List<BusStation> busStations;
+    private List<Stop> stops;
 
     @OneToMany
     private List<Bus> buses;

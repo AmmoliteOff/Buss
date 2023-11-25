@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "bus_stations")
-public class BusStation {
+@Table(name = "stop")
+public class Stop {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -20,7 +20,7 @@ public class ScheduleEntry {
     private Long id;
 
     @ManyToOne
-    private BusStation busStation;
+    private Stop stop;
 
     @ManyToOne()
     @JoinColumn(name = "schedule_id")
