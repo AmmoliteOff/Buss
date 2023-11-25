@@ -24,6 +24,5 @@ public class Schedule {
     private Bus bus;
 
     @Transient
-    @OneToMany
     private List<ScheduleEntry> scheduleEntries;
 }
