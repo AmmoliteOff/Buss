@@ -22,6 +22,8 @@ public class Route {
 
     private String title;
 
+    private int norm;
+
     private double loadFactor;
 
     @OneToMany
@@ -36,4 +38,12 @@ public class Route {
     @Transient
 //    @OneToMany(mappedBy = "route", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<RouteChange> changes;
+
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof Route anotherRoute)){
+            return false;
+        }
+        return anotherRoute.getId().equals(this.id);
+    }
 }

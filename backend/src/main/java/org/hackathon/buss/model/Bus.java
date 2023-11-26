@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hackathon.buss.enums.BusStatus;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +20,9 @@ public class Bus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated
+    private BusStatus status;
 
     private double charge;
 
