@@ -22,15 +22,15 @@ public class ScheduleEntry {
     @ManyToOne
     private Stop stop;
 
-    @ManyToOne()
-    @JoinColumn(name = "schedule_id")
-    private Schedule schedule;
+//    @ManyToOne()
+//    @JoinColumn(name = "schedule_id")
+//    private Schedule schedule;
 
     private LocalDateTime time;
 
     public ScheduleEntry(LocalDateTime time, Schedule schedule, Stop stop){
         this.stop = stop;
-        this.schedule = schedule;
+        //this.schedule = schedule;
         this.time = time;
     }
 }

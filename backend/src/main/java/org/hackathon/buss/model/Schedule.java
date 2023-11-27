@@ -1,5 +1,6 @@
 package org.hackathon.buss.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,8 +24,9 @@ public class Schedule {
     private Long scheduleId;
 
     @OneToOne
+    @JsonIgnore
     private Bus bus;
 
-    @Transient
+    @OneToMany
     private List<ScheduleEntry> scheduleEntries = new ArrayList<>();
 }

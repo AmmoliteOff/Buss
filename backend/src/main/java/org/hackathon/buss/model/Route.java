@@ -1,5 +1,6 @@
 package org.hackathon.buss.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,11 +24,12 @@ public class Route {
     private Long id;
 
     @OneToOne
+    @JsonIgnore
     private Route oppositeRoute;
 
-    private LocalDateTime start;
+    private LocalDateTime startTime;
 
-    private LocalDateTime end;
+    private LocalDateTime endTime;
 
     private String title;
 
@@ -39,6 +41,7 @@ public class Route {
     private List<Stop> stops;
 
     @Transient
+    @JsonIgnore
     private List<Bus> buses;
 
     @OneToMany

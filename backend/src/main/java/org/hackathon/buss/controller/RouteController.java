@@ -3,7 +3,10 @@ package org.hackathon.buss.controller;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
+import org.hackathon.buss.model.Schedule;
 import org.hackathon.buss.service.RouteService;
+import org.hackathon.buss.service.ScheduleService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,7 @@ import java.util.List;
 public class RouteController {
 
     private final RouteService routeService;
+    private final ScheduleService scheduleService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Route> getRoute(@PathVariable Long id) {
@@ -44,4 +48,10 @@ public class RouteController {
         return ResponseEntity.ok(new Route());
     }
 
+
+    @PostMapping("/lol")
+    public ResponseEntity<List<Route>> dasd(){
+        scheduleService.createScheduleBasedOnStats();
+        return new ResponseEntity<List<Route>>(routeService.findAll(), HttpStatus.OK);
+    }
 }

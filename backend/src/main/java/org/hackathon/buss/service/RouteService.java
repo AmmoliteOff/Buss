@@ -48,14 +48,14 @@ public class RouteService {
     }
 
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
-        return 0;
+        return 3;
     }
 
     public int getAverageRoadTime(int time, Route route){
-        return 0;
+        return 34;
     }
 
     public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
-        return 0;
+        return 4;
     }
 }
