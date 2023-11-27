@@ -19,9 +19,9 @@ public class StopStats {
 
     private int lastBusPeopleCount;
 
-    @ElementCollection
-    @CollectionTable(name = "hourly_average_mapping", joinColumns = @JoinColumn(name = "bus_station_stats_id"))
-    @MapKeyColumn(name = "hour")
-    @Column(name = "average_count")
-    Map<Integer, Double> averagePeopleCount;
+//    @ElementCollection
+//    @CollectionTable(name = "hourly_average_mapping", joinColumns = @JoinColumn(name = "bus_station_stats_id"))
+//    @MapKeyColumn(name = "hour")
+//    @Column(name = "average_count")
+//    Map<Integer, StopStatsByDay> averagePeopleCount;
 }

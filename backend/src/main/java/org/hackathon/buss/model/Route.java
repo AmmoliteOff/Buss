@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -20,6 +22,13 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToOne
+    private Route oppositeRoute;
+
+    private LocalDateTime start;
+
+    private LocalDateTime end;
+
     private String title;
 
     private int norm;
@@ -33,7 +42,7 @@ public class Route {
     private List<Bus> buses;
 
     @OneToMany
-    private List<Schedule> schedules;
+    private List<Schedule> schedules = new ArrayList<>();
 
     @Transient
 //    @OneToMany(mappedBy = "route", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.RouteChange;
+import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.repository.RouteRepository;
 import org.springframework.stereotype.Service;
 
@@ -44,5 +45,17 @@ public class RouteService {
         routeChange.setRoute(route);
         route.getChanges().add(routeChange);
         return save(route);
+    }
+
+    public int getNorm(Route route, int dayOfWeek, int timeInterval){
+        return 0;
+    }
+
+    public int getAverageRoadTime(int time, Route route){
+        return 0;
+    }
+
+    public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
+        return 0;
     }
 }

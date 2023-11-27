@@ -26,5 +26,11 @@ public class ScheduleEntry {
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
-    private LocalDateTime dateTime;
+    private LocalDateTime time;
+
+    public ScheduleEntry(LocalDateTime time, Schedule schedule, Stop stop){
+        this.stop = stop;
+        this.schedule = schedule;
+        this.time = time;
+    }
 }
