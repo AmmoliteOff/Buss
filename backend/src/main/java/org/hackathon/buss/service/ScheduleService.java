@@ -2,6 +2,7 @@ package org.hackathon.buss.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.BusRepository;
 import org.hackathon.buss.repository.RouteRepository;
@@ -15,18 +16,14 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 @Service
 @AllArgsConstructor
 public class ScheduleService {
     private final int interval = 30;
-    private final BusRepository busRepository;
-    private final IntegrationService integrationService;
     private final RouteService routeService;
-    private final ScheduleRepository scheduleRepository;
-    private final ScheduleEntryReposirory scheduleEntryRepository;
-    private final RouteRepository routeRepository;
-    private List<ScheduleConstructor> scheduleConstructorList = new ArrayList<>();
+    private final BusService busService;
     private int getCurrentTimeIntervalInt() {
         var time = LocalDateTime.now();
         int minute = time.getMinute();
@@ -48,11 +45,6 @@ public class ScheduleService {
     private int getTimeIntervalByDate(LocalDateTime dateTime){
         LocalTime midnight = LocalTime.MIDNIGHT;
         long minutesSinceMidnight = ChronoUnit.MINUTES.between(midnight, dateTime.toLocalTime());
-
-//        if (timeSlot == 48 && dateTime.getMinute() > 0) {
-//            timeSlot = 1;
-//        }
-
         return (int) (minutesSinceMidnight / 30) + 1;
     }
 
@@ -61,187 +53,138 @@ public class ScheduleService {
         DayOfWeek dayOfWeek = now.getDayOfWeek();
         return dayOfWeek.getValue();
     }
-    private void updateBusStationsLoadInfo() {
-        //
-    }
-    public void createScheduleBasedOnStats() {
-        var routes = routeRepository.findAll();
-        var skipList = new ArrayList<Route>();
-        for (Route a:
-             routes) {
-            if(!skipList.contains(a)) {
-                var b = a.getOppositeRoute();
-                skipList.add(b);
-                scheduleConstructorList.add(new ScheduleConstructor(a, b));
+
+    private Schedule createSchedule(Queue<LocalDateTime> queue, LocalDateTime time, Route route){
+        Schedule schedule = null;
+        if(!queue.isEmpty()) {
+            var request = queue.peek();
+            if (request.getHour() * 60 + request.getMinute() <= time.getHour() * 60 + time.getMinute()) {
+                Stop prevStop = null;
+                var arrivalTime = time.plusMinutes(0);
+                schedule = new Schedule();
+                queue.poll();
+                for (int j = 0; j < route.getRoute().size(); j++) {
+                    if (route.getRoute().get(j).getStop() != null) {
+                        if (prevStop != null) {
+                            arrivalTime = arrivalTime.plusMinutes(routeService
+                                    .getAverageStopToStopTime(getTimeIntervalByDate(time), route, prevStop, route.getRoute().get(j).getStop()));
+                        }
+                        schedule.getScheduleEntries().add(
+                                new ScheduleEntry(
+                                        arrivalTime,
+                                        schedule,
+                                        route.getRoute().get(j).getStop()
+                                )
+                        );
+                        prevStop = route.getRoute().get(j).getStop();
+                    }
+                }
+                route.getSchedules().add(schedule);
             }
-        }
-
-        var dayOfWeek = getCurrentDayOfWeek();
-        for(ScheduleConstructor sc: scheduleConstructorList) {
-            var busesA = busRepository.findAllByRoute(sc.getA());
-            var busesB = busRepository.findAllByRoute(sc.getB());
-
-            for (Bus bus :
-                    busesA) {
-                sc.getARouteBusQueue().add(bus);
-            }
-
-            for (Bus bus :
-                    busesB) {
-                sc.getBRouteBusQueue().add(bus);
-            }
-
-            var time = getTimeIntervalByDate(sc.getStart());
-            var currentTimeInterval = LocalDateTime.now()
-                    .withHour(sc.getStart().getHour())
-                    .withMinute(sc.getStart().getMinute())
-                    .withSecond(sc.getStart().getSecond())
-                    .withNano(sc.getStart().getNano());
-            var priorityStartTime = sc.getStart();
-            while (currentTimeInterval.getHour() * 60 + currentTimeInterval.getMinute() < sc.getEnd().getHour() * 60 + sc.getEnd().getMinute()) {
-                var AN = routeService.getNorm(sc.getA(), dayOfWeek, time);
-                var BN = routeService.getNorm(sc.getB(), dayOfWeek, time);
-
-                var priorityRoute = AN > BN ? sc.getA() : sc.getB();
-                var nonPriorityRoute = AN > BN ? sc.getB() : sc.getA();
-
-                var priorityNnext = routeService.getNorm(priorityRoute, dayOfWeek, time + 1);
-
-                var priorityIntervalEnd = currentTimeInterval.plusMinutes(interval);
-
-                var nonPriorityStartTime = (priorityIntervalEnd.plusMinutes(interval / priorityNnext))
-                        .minusMinutes(routeService.getAverageRoadTime(time, nonPriorityRoute));
-
-                int priorityStep = 0;
-                int nonPriorityStep = 0;
-                int nonPriorityNorm = 0;
-                int priorityNorm = 0;
-
-
-                if (priorityRoute == sc.getA()) {
-                    int val = priorityNnext - BN;
-                    nonPriorityNorm = BN + val;
-                    priorityNorm = AN;
-                } else {
-                    int val = priorityNnext - AN;
-                    nonPriorityNorm = AN + val;
-                    priorityNorm = BN;
-                }
-
-                if (priorityNorm > sc.getRouteBusQueue(priorityRoute).size() + sc.getRouteRestBusQueue(priorityRoute).size())
-                    priorityNorm = sc.getRouteBusQueue(priorityRoute).size() + sc.getRouteRestBusQueue(priorityRoute).size();
-                if (nonPriorityNorm > sc.getRouteBusQueue(nonPriorityRoute).size() + sc.getRouteRestBusQueue(nonPriorityRoute).size())
-                    nonPriorityNorm = sc.getRouteBusQueue(nonPriorityRoute).size() + sc.getRouteRestBusQueue(nonPriorityRoute).size();
-
-                while (priorityNorm > sc.getRouteBusQueue(priorityRoute).size() && !sc.getRouteRestBusQueue(priorityRoute).isEmpty()) {
-                    sc.getRouteBusQueue(priorityRoute).add(sc.getRouteRestBusQueue(priorityRoute).poll());
-                }
-
-                while (nonPriorityNorm > sc.getRouteBusQueue(nonPriorityRoute).size() && !sc.getRouteRestBusQueue(nonPriorityRoute).isEmpty()) {
-                    sc.getRouteBusQueue(nonPriorityRoute).add(sc.getRouteRestBusQueue(nonPriorityRoute).poll());
-                }
-
-                while (priorityNorm < sc.getRouteBusQueue(priorityRoute).size() && !sc.getRouteBusQueue(priorityRoute).isEmpty()) {
-                    sc.getRouteRestBusQueue(priorityRoute).add(sc.getRouteBusQueue(priorityRoute).poll());
-                }
-
-                while (nonPriorityNorm < sc.getRouteBusQueue(nonPriorityRoute).size() && !sc.getRouteBusQueue(nonPriorityRoute).isEmpty()) {
-                    sc.getRouteRestBusQueue(nonPriorityRoute).add(sc.getRouteBusQueue(nonPriorityRoute).poll());
-                }
-
-                priorityStep = interval / priorityNorm;
-                nonPriorityStep = interval / nonPriorityNorm;
-
-                for (int i = 0; i < priorityNorm; i++) {
-                    var scheduleStartTime = priorityStartTime.plusMinutes((long) priorityStep * i);
-                    var schedule = createSchedule(priorityRoute, scheduleStartTime, time);
-                    var bus = sc.getRouteBusQueue(priorityRoute).poll();
-                    schedule.setBus(bus);
-                    scheduleRepository.save(schedule);
-                    priorityRoute.getSchedules().add(schedule);
-                    sc.getRouteBusInRoad(priorityRoute).add(bus);
-                }
-
-                for (int i = 0; i < nonPriorityNorm; i++) {
-                    var scheduleStartTime = nonPriorityStartTime.plusMinutes((long) nonPriorityStep * i);
-                    var schedule = createSchedule(nonPriorityRoute, scheduleStartTime, time);
-                    var bus = sc.getRouteBusQueue(nonPriorityRoute).poll();
-                    schedule.setBus(bus);
-                    scheduleRepository.save(schedule);
-                    nonPriorityRoute.getSchedules().add(schedule);
-                    sc.getRouteBusInRoad(nonPriorityRoute).add(bus);
-                }
-
-                time++;
-                currentTimeInterval = currentTimeInterval.plusMinutes(interval);
-                priorityStartTime = priorityStartTime.plusMinutes(routeService.getAverageRoadTime(time, nonPriorityRoute));
-                for (int i = 0; i < sc.getRouteBusInRoad(nonPriorityRoute).size(); i++) {
-                    sc.getRouteBusQueue(priorityRoute).add(sc.getRouteBusInRoad(nonPriorityRoute).poll());
-                }
-
-                for (int i = 0; i < sc.getRouteBusInRoad(priorityRoute).size(); i++) {
-                    sc.getRouteBusQueue(nonPriorityRoute).add(sc.getRouteBusInRoad(priorityRoute).poll());
-                }
-            }
-        }
-        routeRepository.saveAll(routes);
-    }
-
-    private Schedule createSchedule(Route route, LocalDateTime from, int time){
-        from = from.plusMinutes(0);
-        var schedule = new Schedule();
-        for(int i = 0; i<route.getStops().size(); i++){
-            var se = new ScheduleEntry(from, schedule, route.getStops().get(i));
-            schedule
-                    .getScheduleEntries()
-                    .add(se);
-            scheduleEntryRepository.save(se);
-            if(i+1<route.getStops().size())
-                from = from.plusMinutes(routeService.getAverageStopToStopTime(time, route, route.getStops().get(i), route.getStops().get(i+1)));
         }
         return schedule;
     }
+    public void createStatsSchedule(){
+        List<Route> routes = routeService.findAll();
+        List<ScheduleConstructor> scheduleConstructorList = new ArrayList<>();
+        for(int i = 0; i<routes.size(); i++){
+            routes.remove(routes.get(i).getOppositeRoute());
+        }
+        for (Route route:
+             routes) {
+            scheduleConstructorList.add(new ScheduleConstructor(route, route.getOppositeRoute()));
+        }
 
-//    @PostConstruct
-//    private void init() {
-//
-//        var routes = routeRepository.findAll();
-//
-//        var busesWithoutRoute = new ArrayList<>(busRepository.findAll()
-//                .stream()
-//                .filter(bus -> bus.getRoute() == null)
-//                .toList());
-//
-//        var busesWithRoute = busRepository.findAll()
-//                .stream()
-//                .filter(bus -> bus.getRoute() != null)
-//                .toList();
-//
-//
-//        for (Route route :
-//                routes) {
-//            routeQueueList.add(new RouteQueue(route));
-//        }
-//
-//        for (RouteQueue routeQueue :
-//                routeQueueList) {
-//            var route = routeQueue.getRoute();
-//            var busesFromRoute = busesWithRoute
-//                    .stream()
-//                    .filter(bus -> bus.getRoute().equals(route))
-//                    .toList();
-//
-//            for (Bus bus : busesFromRoute) {
-//                routeQueue.getBusQueue().add(bus);
-//            }
-//
-//            while (routeQueue.getBusQueue().size() < route.getNorm() && !busesWithoutRoute.isEmpty()) {
-//                var bus = busesWithoutRoute.get(0);
-//                routeQueue.getBusQueue().add(bus);
-//                busesWithoutRoute.remove(bus);
-//                bus.setRoute(route);
-//            }
-//        }
-//       //createSchedule();
-//    }
+        var dayOfWeek = getCurrentDayOfWeek();
+
+        for (ScheduleConstructor sc:
+             scheduleConstructorList) {
+            var time = sc.getStart();
+
+            while(time.getHour()*60 + time.getMinute() < sc.getEnd().getHour() * 60 + sc.getEnd().getMinute()){
+
+                if(time.getMinute()%interval == 0) {
+                    var Anorm = routeService.getNorm(sc.getA(), dayOfWeek, getTimeIntervalByDate(time));
+                    var Bnorm = routeService.getNorm(sc.getB(), dayOfWeek, getTimeIntervalByDate(time));
+
+                    Anorm = Math.max(Anorm, interval / sc.getA().getStandartStep());
+                    Bnorm = Math.max(Bnorm, interval / sc.getB().getStandartStep());
+
+                    var Astep = interval/Anorm;
+                    var Bstep = interval/Bnorm;
+
+                    for(int i = 0; i<Anorm; i++){
+                        var requestTime = time.plusMinutes((long) Astep *i);
+                        sc.getA_requestQueue().add(requestTime);
+                    }
+
+                    for(int j = 0; j<Bnorm; j++){
+                        var requestTime = time.plusMinutes((long) Bstep * j);
+                        sc.getB_requestQueue().add(requestTime);
+                    }
+                }
+                var aPeek = sc.getA_roadQueue().peek();
+                if(aPeek!=null) {
+                    if (time.getMinute() + time.getHour() * 60 >= aPeek.getArrivalTime().getHour() * 60 + aPeek.getArrivalTime().getMinute()) {
+                        var bus = sc.getA_roadQueue().poll().getBus();
+                        sc.getB_restQueue().add(bus);
+                        var g = 0;
+                    }
+                }
+
+                var bPeek = sc.getB_roadQueue().peek();
+                if(bPeek!=null) {
+                    if (time.getMinute() + time.getHour() * 60 >= bPeek.getArrivalTime().getHour() * 60 + bPeek.getArrivalTime().getMinute()) {
+                        var bus = sc.getB_roadQueue().poll().getBus();
+                        sc.getA_restQueue().add(bus);
+                    }
+                }
+
+                int checkAmount = sc.getA_restQueue().size();
+                for(int i = 0; i<checkAmount; i++){
+                    var bus = sc.getA_restQueue().peek();
+                    if(bus.getStatus() == BusStatus.READY) {
+                        var schedule = createSchedule(sc.getA_requestQueue(), time, sc.getA());
+                        if(schedule!=null) {
+                            schedule.setBus(bus);
+                            sc.getA_restQueue().poll();
+                                sc.getA_roadQueue().add(
+                                        new RoadEntry(
+                                                bus,
+                                                schedule.getScheduleEntries()
+                                                        .get(schedule.getScheduleEntries().size() - 1)
+                                                        .getTime()
+                                        )
+                                );
+                        }
+                    }
+                }
+
+                checkAmount = sc.getB_restQueue().size();
+                for(int i = 0; i<checkAmount; i++){
+                    var bus = sc.getB_restQueue().peek();
+                    if(bus.getStatus() == BusStatus.READY){
+                        var schedule = createSchedule(sc.getB_requestQueue(), time, sc.getB());
+                        if(schedule!=null) {
+                            schedule.setBus(bus);
+                            sc.getB_restQueue().poll();
+                                sc.getB_roadQueue().add(
+                                        new RoadEntry(
+                                                bus,
+                                                schedule.getScheduleEntries()
+                                                        .get(schedule.getScheduleEntries().size() - 1)
+                                                        .getTime()
+                                        )
+                                );
+                        }
+                    }
+                }
+
+
+                time = time.plusMinutes(1);
+            }
+            var a = 0;
+        }
+
+    }
 }

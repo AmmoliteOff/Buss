@@ -51,7 +51,7 @@ public class RouteController {
 
     @PostMapping("/lol")
     public ResponseEntity<List<Route>> dasd(){
-        scheduleService.createScheduleBasedOnStats();
+        scheduleService.createStatsSchedule();
         return new ResponseEntity<List<Route>>(routeService.findAll(), HttpStatus.OK);
     }
 }

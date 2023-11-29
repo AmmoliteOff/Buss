@@ -1,5 +1,6 @@
 package org.hackathon.buss.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,12 +28,15 @@ public class Bus {
     private double charge;
 
     @ManyToOne
+    @JsonIgnore
     private Route route;
 
     @OneToOne
+    @JsonIgnore
     private User busDriver;
 
     @OneToOne
+    @JsonIgnore
     private Schedule schedule;
 
     private int posX;

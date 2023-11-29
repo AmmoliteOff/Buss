@@ -11,43 +11,25 @@ public class ScheduleConstructor {
     private Route A;
     private Route B;
 
-    private Queue<Bus> ARouteBusQueue = new ArrayDeque<>();
-    private Queue<Bus> BRouteBusQueue = new ArrayDeque<>();
-
-    private Queue<Bus> ARouteBusRestQueue = new ArrayDeque<>();
-    private Queue<Bus> BRouteBusRestQueue = new ArrayDeque<>();
-
-    private Queue<Bus> ARouteBusInRoad = new ArrayDeque<>();
-    private Queue<Bus> BRouteBusInRoad= new ArrayDeque<>();
-
     private LocalDateTime start;
     private LocalDateTime end;
+
+    private Queue<LocalDateTime> A_requestQueue = new ArrayDeque<LocalDateTime>();
+    private Queue<LocalDateTime> B_requestQueue = new ArrayDeque<LocalDateTime>();
+
+    private Queue<RoadEntry> A_roadQueue = new ArrayDeque<RoadEntry>();
+    private Queue<RoadEntry> B_roadQueue = new ArrayDeque<RoadEntry>();
+
+    private Queue<Bus> A_restQueue = new ArrayDeque<Bus>();
+    private Queue<Bus> B_restQueue = new ArrayDeque<Bus>();
 
     public ScheduleConstructor(Route A, Route B){
         this.A = A;
         this.B = B;
         start = A.getStartTime();
         end = A.getEndTime();
+        A_restQueue.addAll(A.getBuses());
+        B_restQueue.addAll(B.getBuses());
     }
 
-    public Queue<Bus> getRouteBusQueue(Route route){
-        if(route.equals(A))
-            return ARouteBusQueue;
-        else
-            return BRouteBusQueue;
-    }
-
-    public Queue<Bus> getRouteBusInRoad(Route route){
-        if(route.equals(A))
-            return ARouteBusInRoad;
-        else
-            return BRouteBusInRoad;
-    }
-
-    public Queue<Bus> getRouteRestBusQueue(Route route){
-        if(route.equals(A))
-            return ARouteBusRestQueue;
-        else
-            return BRouteBusRestQueue;
-    }
 }

@@ -37,10 +37,13 @@ public class Route {
 
     private double loadFactor;
 
-    @OneToMany
-    private List<Stop> stops;
+    private int standartStep;
 
-    @Transient
+    @OneToMany
+    @JsonIgnore
+    private List<Waypoint> route;
+
+    @OneToMany
     @JsonIgnore
     private List<Bus> buses;
 

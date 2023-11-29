@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +49,8 @@ public class RouteService {
     }
 
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
-        return 3;
+        Random random = new Random();
+        return random.nextInt(1, 4);
     }
 
     public int getAverageRoadTime(int time, Route route){
@@ -56,6 +58,8 @@ public class RouteService {
     }
 
     public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
-        return 4;
+        Random random = new Random();
+
+        return random.nextInt(1, 20);
     }
 }
