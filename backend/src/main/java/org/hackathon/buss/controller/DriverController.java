@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/driver")
 public class DriverController {
-
-    private final StatsService statsService;
-
-    @PostMapping("/nextCheckPoint")
-    public ResponseEntity<HttpStatus> nextCheckPoint(Bus bus){
-        if(bus.getBusDriver()!=null && bus.getSchedule()!=null) {
-            statsService.updateNextStationInfo(bus);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        else
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
+//
+//    private final StatsService statsService;
+//
+//    @PostMapping("/nextCheckPoint")
+//    public ResponseEntity<HttpStatus> nextCheckPoint(Bus bus){
+//        if(bus.getBusDriver()!=null && bus.getSchedule()!=null) {
+//            statsService.updateNextStationInfo(bus);
+//            return new ResponseEntity<>(HttpStatus.OK);
+//        }
+//        else
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//    }
 }

@@ -27,6 +27,10 @@ public class Schedule {
     @JsonIgnore
     private Bus bus;
 
-    @OneToMany
+    @ManyToOne
+    @JsonIgnore
+    private Route route;
+
+    @Transient
     private List<ScheduleEntry> scheduleEntries = new ArrayList<>();
 }

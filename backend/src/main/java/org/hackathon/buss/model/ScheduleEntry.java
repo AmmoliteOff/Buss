@@ -24,9 +24,9 @@ public class ScheduleEntry {
     @JsonIgnore
     private Stop stop;
 
-//    @ManyToOne()
-//    @JoinColumn(name = "schedule_id")
-//    private Schedule schedule;
+    @ManyToOne
+    @JsonIgnore
+    private Schedule schedule;
 
     private LocalDateTime time;
 

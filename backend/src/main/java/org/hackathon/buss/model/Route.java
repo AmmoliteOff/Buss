@@ -33,25 +33,20 @@ public class Route {
 
     private String title;
 
-    private int norm;
-
-    private double loadFactor;
-
     private int standartStep;
 
-    @OneToMany
+    @OneToMany (mappedBy = "route")
     @JsonIgnore
     private List<Waypoint> route;
 
-    @OneToMany
+    @OneToMany(mappedBy = "route")
     @JsonIgnore
     private List<Bus> buses;
 
-    @OneToMany
+    @OneToMany (mappedBy = "route")
     private List<Schedule> schedules = new ArrayList<>();
 
-    @Transient
-//    @OneToMany(mappedBy = "route", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany (mappedBy = "route")
     private List<RouteChange> changes;
 
     @Override
