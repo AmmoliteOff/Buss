@@ -8,6 +8,7 @@ import org.hackathon.buss.repository.BusRepository;
 import org.hackathon.buss.repository.RouteRepository;
 import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
+import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -18,10 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
+import static org.hackathon.buss.util.Constants.INTERVAL;
+
 @Service
 @AllArgsConstructor
 public class ScheduleService {
-    private final int interval = 30;
     private final RouteService routeService;
     private final BusService busService;
     private int getCurrentTimeIntervalInt() {
@@ -31,7 +33,7 @@ public class ScheduleService {
 
         var c = time.withMinute(roundedMinute).withSecond(0).withNano(0);
         var minutes = c.getHour()*60+c.getMinute();
-        return minutes/interval;
+        return minutes/ INTERVAL;
     }
 
     private LocalDateTime getCurrentTimeInterval() {
@@ -103,15 +105,15 @@ public class ScheduleService {
 
             while(time.getHour()*60 + time.getMinute() < sc.getEnd().getHour() * 60 + sc.getEnd().getMinute()){
 
-                if(time.getMinute()%interval == 0) {
+                if(time.getMinute()%INTERVAL == 0) {
                     var Anorm = routeService.getNorm(sc.getA(), dayOfWeek, getTimeIntervalByDate(time));
                     var Bnorm = routeService.getNorm(sc.getB(), dayOfWeek, getTimeIntervalByDate(time));
 
-                    Anorm = Math.max(Anorm, interval / sc.getA().getStandartStep());
-                    Bnorm = Math.max(Bnorm, interval / sc.getB().getStandartStep());
+                    Anorm = Math.max(Anorm, INTERVAL / sc.getA().getStandartStep());
+                    Bnorm = Math.max(Bnorm, INTERVAL / sc.getB().getStandartStep());
 
-                    var Astep = interval/Anorm;
-                    var Bstep = interval/Bnorm;
+                    var Astep = INTERVAL/Anorm;
+                    var Bstep = INTERVAL/Bnorm;
 
                     for(int i = 0; i<Anorm; i++){
                         var requestTime = time.plusMinutes((long) Astep *i);

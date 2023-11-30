@@ -31,6 +31,6 @@ public class Schedule {
     @JsonIgnore
     private Route route;
 
-    @Transient
+    @OneToMany(mappedBy = "schedule")
     private List<ScheduleEntry> scheduleEntries = new ArrayList<>();
 }

@@ -5,7 +5,9 @@ import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.model.Stop;
+import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.repository.RouteRepository;
+import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+
+import static org.hackathon.buss.util.Constants.BUS_CAPACITY;
+import static org.hackathon.buss.util.Constants.INTERVAL;
 
 @Service
 @RequiredArgsConstructor
@@ -49,14 +54,20 @@ public class RouteService {
     }
 
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
-        Random random = new Random();
-        return random.nextInt(1, 4);
+        int value = 0;
+        for (Waypoint waypoint:
+             route.getRoute()) {
+            if(waypoint.getStop()!=null){
+                value += waypoint.getStop()
+                        .getPeopleStatsMap()
+                        .get(dayOfWeek)
+                        .getPeopleCountByTimeInterval()
+                        .get(timeInterval);
+            }
+        }
+        var norm = (int) Math.ceil(value/BUS_CAPACITY);
+        return Math.max(norm, INTERVAL / route.getStandartStep());
     }
-
-    public int getAverageRoadTime(int time, Route route){
-        return 34;
-    }
-
     public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
         Random random = new Random();
 
