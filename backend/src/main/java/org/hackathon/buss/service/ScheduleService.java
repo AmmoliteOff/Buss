@@ -86,7 +86,30 @@ public class ScheduleService {
         }
         return schedule;
     }
-    public void createStatsSchedule(){
+
+    public void createStaticSchedule(){
+        List<Route> routes = routeService.findAll();
+        List<ScheduleConstructor> scheduleConstructorList = new ArrayList<>();
+        for(int i = 0; i<routes.size(); i++){
+            routes.remove(routes.get(i).getOppositeRoute());
+        }
+        for (Route route:
+                routes) {
+            scheduleConstructorList.add(new ScheduleConstructor(route, route.getOppositeRoute()));
+        }
+
+        var dayOfWeek = getCurrentDayOfWeek();
+
+        for (ScheduleConstructor sc:
+                scheduleConstructorList) {
+
+        }
+    }
+
+//    0 - static
+//    1 - based on statistic
+//    2- real time + statistic
+    public void createStatsSchedule(int type){
         List<Route> routes = routeService.findAll();
         List<ScheduleConstructor> scheduleConstructorList = new ArrayList<>();
         for(int i = 0; i<routes.size(); i++){
@@ -106,21 +129,37 @@ public class ScheduleService {
             while(time.getHour()*60 + time.getMinute() < sc.getEnd().getHour() * 60 + sc.getEnd().getMinute()){
 
                 if(time.getMinute()%INTERVAL == 0) {
-                    var Anorm = routeService.getNorm(sc.getA(), dayOfWeek, getTimeIntervalByDate(time));
-                    var Bnorm = routeService.getNorm(sc.getB(), dayOfWeek, getTimeIntervalByDate(time));
+                    var Anorm = 0;
+                    var Bnorm = 0;
+                    var Astep = 0;
+                    var Bstep = 0;
+                    switch (type) {
+                        case 0:
+                            Anorm = INTERVAL/sc.getA().getStandartStep();
+                            Bnorm = INTERVAL/sc.getB().getStandartStep();
 
-                    Anorm = Math.max(Anorm, INTERVAL / sc.getA().getStandartStep());
-                    Bnorm = Math.max(Bnorm, INTERVAL / sc.getB().getStandartStep());
+                            Astep = sc.getA().getStandartStep();
+                            Bstep = sc.getB().getStandartStep();
+                        break;
+                        case 1:
+                            Anorm = routeService.getNorm(sc.getA(), dayOfWeek, getTimeIntervalByDate(time));
+                            Bnorm = routeService.getNorm(sc.getB(), dayOfWeek, getTimeIntervalByDate(time));
 
-                    var Astep = INTERVAL/Anorm;
-                    var Bstep = INTERVAL/Bnorm;
+                            Anorm = Math.max(Anorm, INTERVAL / sc.getA().getStandartStep());
+                            Bnorm = Math.max(Bnorm, INTERVAL / sc.getB().getStandartStep());
 
-                    for(int i = 0; i<Anorm; i++){
-                        var requestTime = time.plusMinutes((long) Astep *i);
+                            Astep = INTERVAL / Anorm;
+                            Bstep = INTERVAL / Bnorm;
+                            break;
+                        case 2:
+                            break;
+                    }
+                    for (int i = 0; i < Anorm; i++) {
+                        var requestTime = time.plusMinutes((long) Astep * i);
                         sc.getA_requestQueue().add(requestTime);
                     }
 
-                    for(int j = 0; j<Bnorm; j++){
+                    for (int j = 0; j < Bnorm; j++) {
                         var requestTime = time.plusMinutes((long) Bstep * j);
                         sc.getB_requestQueue().add(requestTime);
                     }
@@ -181,12 +220,8 @@ public class ScheduleService {
                         }
                     }
                 }
-
-
                 time = time.plusMinutes(1);
             }
-            var a = 0;
         }
-
     }
 }
