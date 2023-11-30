@@ -39,9 +39,8 @@ public class Bus {
     @JsonIgnore
     private Schedule schedule;
 
-    private int posX;
-
-    private int posY;
+    private double latitude;
+    private double longitude;
 
     private LocalDateTime nextCharge;
 }

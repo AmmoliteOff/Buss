@@ -1,8 +1,8 @@
 package org.hackathon.buss.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.hackathon.buss.model.Incident;
-import org.hackathon.buss.service.IncidentService;
+import org.hackathon.buss.model.Event;
+import org.hackathon.buss.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/incident")
-public class IncidentController {
+public class EventController {
 
-    private final IncidentService incidentService;
+    private final EventService eventService;
 
     @PostMapping("/create")
-    public ResponseEntity<HttpStatus> createIncident(@RequestBody Incident incident){
-        incidentService.create(incident);
+    public ResponseEntity<HttpStatus> createEvent(@RequestBody Event event) {
+        eventService.create(event);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

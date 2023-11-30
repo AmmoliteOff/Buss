@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hackathon.buss.enums.IncidentType;
+import org.hackathon.buss.enums.EventType;
 
 import java.time.LocalDateTime;
 
@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "incidents")
-public class Incident {
+@Table(name = "events")
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,7 @@ public class Incident {
     private LocalDateTime dateTime;
 
     @Enumerated(EnumType.STRING)
-    private IncidentType type;
+    private EventType type;
 
     @ManyToOne
     private Bus bus;

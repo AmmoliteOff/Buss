@@ -5,6 +5,7 @@ import org.hackathon.buss.model.User;
 import org.hackathon.buss.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,4 +20,9 @@ public class UserService {
     public void save(User user) {
         userRepository.save(user);
     }
+
+    public List<User> findDispatcher() {
+        return userRepository.findDispatcher();
+    }
+
 }

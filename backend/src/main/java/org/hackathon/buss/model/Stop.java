@@ -16,7 +16,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "stop")
+@Table(name = "stops")
 public class Stop {
 
     @Id
