@@ -35,7 +35,7 @@ public class AuthenticationService {
         if(user.getRole() == Role.DISPATCHER) {
             user = new Dispatcher(user);
             userService.save(user);
-        } else {
+        } else if (user.getRole() == Role.DRIVER) {
             user = new Driver(user);
             userService.save(user);
         }
