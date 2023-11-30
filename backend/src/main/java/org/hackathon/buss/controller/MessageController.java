@@ -1,11 +1,10 @@
 package org.hackathon.buss.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.model.Message;
-import org.hackathon.buss.model.User;
 import org.hackathon.buss.service.MessageService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +18,7 @@ public class MessageController {
     private final MessageService messageService;
 
     @PostMapping("/send")
-    public ResponseEntity<Message> sendMessage (@RequestBody Message message,
-                                                @AuthenticationPrincipal User user) {
+    public ResponseEntity<Message> sendMessage (@RequestBody Message message) {
         return ResponseEntity.ok(messageService.save(message));
     }
 }
