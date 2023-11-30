@@ -5,29 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hackathon.buss.enums.IncidentType;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "incidents")
-public class Incident {
+@Table(name = "message")
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
-
-    private LocalDateTime dateTime;
-
-    @Enumerated(EnumType.STRING)
-    private IncidentType type;
+    @ManyToOne
+    private User sender;
 
     @ManyToOne
-    private Bus bus;
+    private User receiver;
+
+    private String content;
 }

@@ -1,9 +1,9 @@
 package org.hackathon.buss.repository;
 
-import org.hackathon.buss.model.Incident;
+import org.hackathon.buss.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface IncidentRepository extends JpaRepository<Incident, Long> {
+public interface EventRepository extends JpaRepository<Event, Long> {
 }

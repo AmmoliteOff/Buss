@@ -1,6 +1,6 @@
 package org.hackathon.buss.enums;
 
-public enum IncidentType {
+public enum EventType {
 
     ROAD_ACCIDENT,
 
