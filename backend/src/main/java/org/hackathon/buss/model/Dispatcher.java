@@ -2,18 +2,15 @@ package org.hackathon.buss.model;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 
 import java.util.List;
 
 
-@Getter
-@Setter
 @Entity
+@Data
 @DiscriminatorValue("DISPATCHER")
 public class Dispatcher extends User{
 

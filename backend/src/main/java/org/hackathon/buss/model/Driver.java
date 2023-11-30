@@ -1,15 +1,14 @@
 package org.hackathon.buss.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import lombok.Data;
 
 import java.util.List;
 
-
-@Getter
-@Setter
 @Entity
+@Data
 @DiscriminatorValue("DRIVER")
 public class Driver extends User {
 

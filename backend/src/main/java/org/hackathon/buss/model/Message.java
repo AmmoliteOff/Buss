@@ -24,6 +24,7 @@ public class Message {
     private User sender;
 
     @ManyToOne
+    @JsonIgnore
     private User receiver;
 
     private String content;
