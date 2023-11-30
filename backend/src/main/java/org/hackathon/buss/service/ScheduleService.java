@@ -1,14 +1,8 @@
 package org.hackathon.buss.service;
 
-import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
-import org.hackathon.buss.repository.BusRepository;
-import org.hackathon.buss.repository.RouteRepository;
-import org.hackathon.buss.repository.ScheduleEntryReposirory;
-import org.hackathon.buss.repository.ScheduleRepository;
-import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -25,7 +19,6 @@ import static org.hackathon.buss.util.Constants.INTERVAL;
 @AllArgsConstructor
 public class ScheduleService {
     private final RouteService routeService;
-    private final BusService busService;
     private int getCurrentTimeIntervalInt() {
         var time = LocalDateTime.now();
         int minute = time.getMinute();
