@@ -29,11 +29,9 @@ public class Dispatcher extends User{
     }
 
     @OneToMany(mappedBy = "dispatcher", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Event> events;
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Message> messages;
 
     public Dispatcher() {

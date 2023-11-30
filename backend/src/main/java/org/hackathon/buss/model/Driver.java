@@ -27,7 +27,6 @@ public class Driver extends User {
     }
 
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Message> messages;
 
 
