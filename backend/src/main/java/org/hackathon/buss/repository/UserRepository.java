@@ -13,9 +13,4 @@ public interface UserRepository extends JpaRepository<User, Long>{
 
     Optional<User> findByUsername(String username);
 
-
-    @Query("SELECT em.receiver FROM EventMessage em " +
-            "GROUP BY em.receiver " +
-            "ORDER BY COUNT(em.receiver) ASC")
-    List<User> findDispatcher();
 }

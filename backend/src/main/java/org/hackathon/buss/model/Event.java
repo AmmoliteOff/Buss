@@ -28,6 +28,14 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventType type;
 
-    @ManyToOne
+    @OneToOne
     private Bus bus;
+
+    @ManyToOne
+    private User driver;
+
+    @ManyToOne
+    private User dispatcher;
+
+    private boolean processed;
 }

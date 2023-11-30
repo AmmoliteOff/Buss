@@ -2,9 +2,11 @@ package org.hackathon.buss.controller;
 
 import lombok.RequiredArgsConstructor;
 
+import org.hackathon.buss.model.Dispatcher;
+import org.hackathon.buss.model.User;
 import org.hackathon.buss.service.UserService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -13,5 +15,9 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getDispatcher(@PathVariable("id") Long userId) {
+        return ResponseEntity.ok( userService.findById(userId).orElseThrow());
+    }
 
 }

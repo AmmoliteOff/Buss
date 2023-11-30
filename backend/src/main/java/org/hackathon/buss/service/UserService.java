@@ -3,6 +3,7 @@ package org.hackathon.buss.service;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.model.User;
 import org.hackathon.buss.repository.UserRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public List<User> findDispatcher() {
-        return userRepository.findDispatcher();
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
 }
