@@ -1,5 +1,6 @@
 package org.hackathon.buss.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 
 import org.hackathon.buss.model.User;
@@ -15,8 +16,9 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getDispatcher(@PathVariable("id") Long userId) {
-        return ResponseEntity.ok(userService.findById(userId).orElseThrow());
+    public ResponseEntity<User> getUser(@PathVariable("id") Long userId) {
+        User user = userService.findById(userId).orElse(null);
+        return ResponseEntity.ok(user);
     }
 
 }
