@@ -1,6 +1,5 @@
 package org.hackathon.buss.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,11 +32,10 @@ public class Event {
     private Bus bus;
 
     @ManyToOne
-    private User driver;
+    private Driver driver;
 
     @ManyToOne
-    @JsonIgnore
-    private User dispatcher;
+    private Dispatcher dispatcher;
 
     private boolean processed;
 }
