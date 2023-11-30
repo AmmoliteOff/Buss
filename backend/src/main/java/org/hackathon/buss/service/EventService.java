@@ -22,8 +22,6 @@ public class EventService {
         if(event.getId() == null) {
             event.setDateTime(LocalDateTime.now());
         }
-        Event event1 = eventRepository.save(event);
-        System.out.println(event1.getDispatcher().getEvents());
-        return event1;
+        return eventRepository.save(event);
     }
 }

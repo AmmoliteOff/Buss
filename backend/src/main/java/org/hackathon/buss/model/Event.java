@@ -1,12 +1,14 @@
 package org.hackathon.buss.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hackathon.buss.enums.EventType;
+import org.hackathon.buss.util.view.DetailedInformation;
+import org.hackathon.buss.util.view.NonDetailedInformation;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "events")
+@JsonView({DetailedInformation.class, NonDetailedInformation.class})
 public class Event {
 
     @Id
@@ -30,13 +33,15 @@ public class Event {
     private EventType type;
 
     @ManyToOne
+    @JsonView({NonDetailedInformation.class})
     private Bus bus;
 
     @ManyToOne
+    @JsonView({NonDetailedInformation.class})
     private Driver driver;
 
     @ManyToOne
-    @JsonIgnore
+    @JsonView({NonDetailedInformation.class})
     private Dispatcher dispatcher;
 
     private boolean processed;
