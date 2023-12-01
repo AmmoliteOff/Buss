@@ -37,6 +37,6 @@ public class UserService {
                 minLoadeddDispatcher = dispatcher;
             }
         }
-        return minLoadeddDispatcher == null ? dispatchers.get(0) : minLoadeddDispatcher;
+        return minLoadeddDispatcher;
     }
 }
