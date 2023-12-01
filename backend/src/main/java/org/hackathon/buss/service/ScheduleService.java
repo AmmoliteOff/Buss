@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-import static org.hackathon.buss.util.Constants.INTERVAL;
+import static org.hackathon.buss.util.Constants.*;
 
 @Service
 @AllArgsConstructor
@@ -157,12 +157,39 @@ public class ScheduleService {
                         sc.getB_requestQueue().add(requestTime);
                     }
                 }
+
+                for (Bus bus:
+                        sc.getA_restQueue()) {
+                    if(bus.getStatus() == BusStatus.CHARGING){
+                        if(bus.getCharge() <= 80)
+                            bus.setCharge(bus.getCharge()+ 100.0/FULL_CHARGE_TIME);
+
+                        if(bus.getCharge() > 80)
+                            bus.setStatus(BusStatus.READY);
+                    }
+                }
+
+                for (Bus bus:
+                        sc.getB_restQueue()) {
+                    if(bus.getStatus() == BusStatus.CHARGING){
+                        if(bus.getCharge() <= 80)
+                            bus.setCharge(bus.getCharge()+ 100.0/FULL_CHARGE_TIME);
+
+                        if(bus.getCharge() > 80)
+                            bus.setStatus(BusStatus.READY);
+                    }
+                }
+
                 var aPeek = sc.getA_roadQueue().peek();
                 if(aPeek!=null) {
                     if (time.getMinute() + time.getHour() * 60 >= aPeek.getArrivalTime().getHour() * 60 + aPeek.getArrivalTime().getMinute()) {
                         var bus = sc.getA_roadQueue().poll().getBus();
+
+                        bus.setCharge(bus.getCharge() - routeService.getFullDistance(sc.getA())/FULL_CHARGE_DISTANCE * 100);
+
+                        if(bus.getCharge() <= 20.0)
+                            bus.setStatus(BusStatus.CHARGING);
                         sc.getB_restQueue().add(bus);
-                        var g = 0;
                     }
                 }
 
@@ -170,6 +197,11 @@ public class ScheduleService {
                 if(bPeek!=null) {
                     if (time.getMinute() + time.getHour() * 60 >= bPeek.getArrivalTime().getHour() * 60 + bPeek.getArrivalTime().getMinute()) {
                         var bus = sc.getB_roadQueue().poll().getBus();
+
+                        bus.setCharge(bus.getCharge() - routeService.getFullDistance(sc.getB())/FULL_CHARGE_DISTANCE * 100);
+
+                        if(bus.getCharge() <= 20.0)
+                            bus.setStatus(BusStatus.CHARGING);
                         sc.getA_restQueue().add(bus);
                     }
                 }

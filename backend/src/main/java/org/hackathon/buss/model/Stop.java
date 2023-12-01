@@ -25,11 +25,19 @@ public class Stop {
 
     private String title;
 
-    private int posX;
+    private double latitude;
 
-    private int posY;
+    private double longitude;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "stop")
     private Map<Integer, StopPeopleStats> peopleStatsMap = new HashMap<>();
+
+    @Override
+    public boolean equals(Object stop){
+        if(!(stop instanceof Stop c))
+            return false;
+        return c.getId().equals(id);
+    }
+
 }

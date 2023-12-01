@@ -16,8 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.hackathon.buss.util.Constants.BUS_CAPACITY;
-import static org.hackathon.buss.util.Constants.INTERVAL;
+import static org.hackathon.buss.util.Constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -68,9 +67,29 @@ public class RouteService {
         var norm = (int) Math.ceil(value/BUS_CAPACITY);
         return Math.max(norm, INTERVAL / route.getStandartStep());
     }
-    public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
-        Random random = new Random();
 
-        return random.nextInt(1, 20);
+    public double getFullDistance(Route route){
+        double distance = 0;
+        for(int i = 1; i<route.getRoute().size(); i++){
+            distance += DistanceService.calculateDistance(route.getRoute().get(i-1), route.getRoute().get(i));
+        }
+        return distance;
+    }
+
+    public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
+       double distance = 0;
+
+       int aIndex = 0;
+
+       while(!route.getRoute().get(aIndex).getStop().equals(A)){
+           aIndex++;
+       }
+
+        while(!route.getRoute().get(aIndex).getStop().equals(B)){
+            distance+=DistanceService.calculateDistance(route.getRoute().get(aIndex), route.getRoute().get(aIndex+1));
+            aIndex++;
+        }
+
+       return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS
     }
 }

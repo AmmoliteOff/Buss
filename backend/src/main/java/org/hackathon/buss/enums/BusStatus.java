@@ -1,5 +1,10 @@
 package org.hackathon.buss.enums;
 
 public enum BusStatus {
-    READY
+    READY,
+    BROKEN,
+
+    DRIVER_NOT_ASSIGNED,
+
+    CHARGING
 }

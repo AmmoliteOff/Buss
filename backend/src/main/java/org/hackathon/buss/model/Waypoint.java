@@ -12,10 +12,12 @@ public class Waypoint {
     private Long waypointId;
 
     @ManyToOne
-    Route route;
+    private Route route;
 
     @ManyToOne
-    Stop stop;
+    private Stop stop;
+
+    private int currentLoadScore;
 
     private double longitude;
     private double latitude;
