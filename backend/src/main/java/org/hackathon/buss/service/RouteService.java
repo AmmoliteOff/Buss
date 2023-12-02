@@ -33,14 +33,19 @@ public class RouteService {
     }
 
     public Route save(Route route) {
-        route.setChanges(new ArrayList<>());
+        for(Waypoint waypoint : route.getRoute()) {
+            waypoint.setRoute(route);
+        }
+        for(Waypoint waypoint : route.getOppositeRoute().getRoute()) {
+            waypoint.setRoute(route.getOppositeRoute());
+        }
+        route.getOppositeRoute().setOppositeRoute(route);
         return routeRepository.save(route);
     }
 
     public void delete(Long id) {
         routeRepository.delete(findById(id).orElseThrow());
     }
-
     public Route update(Long id, RouteChangeDTO routeChangeDTO) {
         Route route = routeChangeDTO.getRoute();
         route.setId(id);
