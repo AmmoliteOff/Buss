@@ -1,12 +1,15 @@
 package org.hackathon.buss.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hackathon.buss.model.stats.StopPeopleStats;
+import org.hackathon.buss.util.view.DetailedInformation;
+import org.hackathon.buss.util.view.NonDetailedInformation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +20,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Entity
 @Table(name = "stops")
+@JsonView({NonDetailedInformation.class, DetailedInformation.class})
 public class Stop {
 
     @Id
@@ -24,10 +28,6 @@ public class Stop {
     private Long id;
 
     private String title;
-
-    private double latitude;
-
-    private double longitude;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "stop")
