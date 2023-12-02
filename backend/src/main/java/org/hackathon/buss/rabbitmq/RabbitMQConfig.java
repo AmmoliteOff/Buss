@@ -15,7 +15,7 @@ public class RabbitMQConfig {
     private final CachingConnectionFactory cachingConnectionFactory;
 
     @Bean
-    public Queue createUserRegistrationQueue() {
+    public Queue createEventRegistrationQueue() {
         return new Queue("event-registration");
     }
 

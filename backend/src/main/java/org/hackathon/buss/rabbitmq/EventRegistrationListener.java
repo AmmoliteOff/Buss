@@ -19,7 +19,7 @@ public class EventRegistrationListener {
 
     @RabbitListener(queues = {"event-registration"}, concurrency = "5")
     @JsonView(NonDetailedInformation.class)
-    public void onUserRegistration(Event event) throws InterruptedException {
+    public void onEventRegistration(Event event) throws InterruptedException {
         Thread.sleep(3000);
         log.info("Event Registration Received: {}", eventService.save(event));
     }
