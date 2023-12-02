@@ -6,6 +6,7 @@ import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
+import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -104,6 +105,7 @@ public class ScheduleService {
                 var schedule = createSchedule(requestQueue, timeInterval, route);
                 if (schedule != null) {
                     schedule.setBus(bus);
+                    bus.setStatus(BusStatus.IN_ROAD);
                     scheduleRepository.save(schedule);
                     bus.setSchedule(schedule);
                     busService.save(bus);
@@ -121,27 +123,6 @@ public class ScheduleService {
         }
     }
 
-    public void returnBus(Bus bus){
-        for (ScheduleConstructor sc:
-                realTimeScheduleConstructorList) {
-            boolean flag = false;
-            for (RoadEntry re:
-                    sc.getA_roadQueue()) {
-                if(re.getBus().equals(bus)){
-                    re.setBus(bus);
-                    flag = true;
-                }
-            }
-            if(!flag){
-                for (RoadEntry re:
-                        sc.getB_roadQueue()) {
-                    if(re.getBus().equals(bus)){
-                        re.setBus(bus);
-                    }
-                }
-            }
-        }
-    }
     public void busReachedEnd(Bus bus){
         for (ScheduleConstructor sc:
              realTimeScheduleConstructorList) {
@@ -149,8 +130,10 @@ public class ScheduleService {
             for (RoadEntry re:
                  sc.getA_roadQueue()) {
                 if(re.getBus().equals(bus)){
-                    if(bus.getCharge() > 20)
+                    if(bus.getCharge() < 20)
                         bus.setStatus(BusStatus.CHARGING);
+                    else
+                        bus.setStatus(BusStatus.READY);
                     sc.getB_restQueue().add(bus);
                     flag = true;
                 }
@@ -159,8 +142,10 @@ public class ScheduleService {
                 for (RoadEntry re:
                         sc.getB_roadQueue()) {
                     if(re.getBus().equals(bus)){
-                        if(bus.getCharge() > 20)
+                        if(bus.getCharge() < 20)
                             bus.setStatus(BusStatus.CHARGING);
+                        else
+                            bus.setStatus(BusStatus.READY);
                         sc.getA_restQueue().add(bus);
                     }
                 }
@@ -183,7 +168,7 @@ public class ScheduleService {
 
     @Scheduled(fixedDelay = 60000)
     private void updateInfo(){
-
+        updateScheduleInRealTime();
         var timeInterval = LocalDateTime.now();
 
         for (ScheduleConstructor sc:
@@ -336,10 +321,109 @@ public class ScheduleService {
         }
     }
 
-    public void updateScheduleInRealTime(){
-        var intTimeInterval = getCurrentTimeIntervalInt();
-        var timeInterval = getCurrentTimeInterval();
+    public void updateScheduleInRealTime() {
+        var timeInterval = getCurrentTimeInterval().plusMinutes(INTERVAL);
+        var currentTime = LocalDateTime.now();
+        var timeIntervalInt = getCurrentTimeIntervalInt();
+        var dayOfWeek = getCurrentDayOfWeek();
 
+        for (ScheduleConstructor sc :
+                realTimeScheduleConstructorList) {
 
+            var ARealNorm = routeService.getRealNorm(sc.getA());
+            var BRealNorm = routeService.getRealNorm(sc.getB());
+            var AStatsNorm = routeService.getNorm(sc.getA(), dayOfWeek, timeIntervalInt);
+            var BStatsNorm = routeService.getNorm(sc.getB(), dayOfWeek, timeIntervalInt);
+            var ARemovalList = new ArrayList<Schedule>();
+            var BRemovalList = new ArrayList<Schedule>();
+            for (Schedule schedule :
+                    sc.getA().getSchedules()){
+                var scheduleStartTime = schedule.getScheduleEntries().get(0).getTime();
+                if(Math.abs(ARealNorm - AStatsNorm) >= 2){
+                            if (scheduleStartTime.getHour() * 60 + scheduleStartTime.getMinute() >
+                                    currentTime.getHour() * 60 + currentTime.getMinute()
+                                    && scheduleStartTime.getHour() * 60 + scheduleStartTime.getMinute()
+                                    <= timeInterval.getMinute() + timeInterval.getHour()) {
+                                ARemovalList.add(schedule);
+                            }
+                }
+            }
+            for(Schedule schedule: sc.getB().getSchedules()){
+                var scheduleStartTime = schedule.getScheduleEntries().get(0).getTime();
+                if(Math.abs(BRealNorm - BStatsNorm) >= 2){
+                    if (scheduleStartTime.getHour() * 60 + scheduleStartTime.getMinute() >
+                            currentTime.getHour() * 60 + currentTime.getMinute()
+                            && scheduleStartTime.getHour() * 60 + scheduleStartTime.getMinute()
+                            <= timeInterval.getMinute() + timeInterval.getHour()) {
+                        BRemovalList.add(schedule);
+                    }
+                }
+            }
+            if(Math.abs(ARealNorm - AStatsNorm) >= 2) {
+                for (Schedule schedule :
+                        ARemovalList) {
+                    sc.getA().getSchedules().remove(schedule);
+                }
+
+                int AStep = (INTERVAL-currentTime.getMinute())/ARealNorm;
+
+                for (int i = 0; i < ARealNorm; i++){
+                    sc.getA().getSchedules().add(createRealSchedule(currentTime.plusMinutes((long) AStep *i), sc.getA()));
+                }
+            }
+
+            if(Math.abs(ARealNorm - AStatsNorm) >= 2) {
+                for (Schedule schedule :
+                        ARemovalList) {
+                    sc.getA().getSchedules().remove(schedule);
+                }
+
+                int AStep = (INTERVAL-currentTime.getMinute())/ARealNorm;
+
+                for (int i = 0; i < ARealNorm; i++){
+                    sc.getA().getSchedules().add(createRealSchedule(currentTime.plusMinutes((long) AStep *i), sc.getA()));
+                }
+            }
+
+            if(Math.abs(BRealNorm - BStatsNorm) >= 2) {
+                for (Schedule schedule :
+                        BRemovalList) {
+                    sc.getB().getSchedules().remove(schedule);
+                }
+
+                int BStep = (INTERVAL-currentTime.getMinute())/BRealNorm;
+
+                for (int i = 0; i < BRealNorm; i++){
+                    sc.getB().getSchedules().add(createRealSchedule(currentTime.plusMinutes((long) BStep *i), sc.getB()));
+                }
+            }
+        }
+    }
+
+    private Schedule createRealSchedule(LocalDateTime time, Route route){
+        var schedule = new Schedule();
+        schedule.setRoute(route);
+        schedule.getScheduleEntries().add(
+                new ScheduleEntry(
+                        time, schedule, route.getRoute().get(0).getStop()
+                )
+        );
+        Stop prevStop = null;
+        for (Waypoint waypoint:
+                route.getRoute()) {
+            if(waypoint.getStop()!=null){
+                if(prevStop!=null){
+                    schedule.getScheduleEntries().add(
+                            new ScheduleEntry(
+                                    time.plusMinutes(routeService.getAlmostRealStopToStopTime(route, prevStop, waypoint.getStop())),
+                                    schedule,
+                                    waypoint.getStop()
+                            )
+                    );
+                }
+                prevStop = waypoint.getStop();
+            }
+        }
+        return null;
     }
 }

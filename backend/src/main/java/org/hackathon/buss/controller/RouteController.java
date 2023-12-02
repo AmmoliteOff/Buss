@@ -2,8 +2,10 @@ package org.hackathon.buss.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
+import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
+import org.hackathon.buss.service.BusService;
 import org.hackathon.buss.service.RouteService;
 import org.hackathon.buss.service.ScheduleService;
 import org.hackathon.buss.util.view.NonDetailedInformation;
@@ -19,6 +21,7 @@ public class RouteController {
 
     private final RouteService routeService;
     private final ScheduleService scheduleService;
+    private final BusService busService;
 
     @JsonView(NonDetailedInformation.class)
     @GetMapping("/{id}")
@@ -51,9 +54,15 @@ public class RouteController {
     }
 
 
-    @PostMapping("/lol")
-    public ResponseEntity<List<Route>> dasd(){
-        scheduleService.createStatsSchedule(0);
-        return ResponseEntity.ok(routeService.findAll());
+    @PostMapping("/createSchedule/{type}")
+    public ResponseEntity<String> createSchedule(@PathVariable int type){
+        scheduleService.createStatsSchedule(type);
+        return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/finish")
+    public ResponseEntity<String> routeEnd(@RequestBody BusDTO busDto){
+        scheduleService.busReachedEnd(busService.findById(busDto.getBusId()).get());
+        return ResponseEntity.ok("OK");
     }
 }

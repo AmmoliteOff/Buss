@@ -6,5 +6,8 @@ public enum BusStatus {
 
     DRIVER_NOT_ASSIGNED,
 
+    IN_ROAD,
+
+
     CHARGING
 }

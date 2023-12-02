@@ -23,6 +23,7 @@ import static org.hackathon.buss.util.Constants.*;
 public class RouteService {
 
     private final RouteRepository routeRepository;
+    private final IntegrationService integrationService;
     private final RouteChangeService routeChangeService;
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
@@ -96,5 +97,34 @@ public class RouteService {
         }
 
        return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS
+    }
+
+    public int getRealNorm(Route route){
+        int value = 0;
+        for (Waypoint waypoint:
+                route.getRoute()) {
+            if(waypoint.getStop()!=null){
+                value += integrationService.getPeopleCount(waypoint.getStop());
+            }
+        }
+        var norm = (int) Math.ceil(value/BUS_CAPACITY);
+        return Math.max(norm, INTERVAL / route.getStandartStep());
+    }
+
+    public int getAlmostRealStopToStopTime(Route route, Stop A, Stop B){
+        double distance = 0;
+
+        int aIndex = 0;
+
+        while(!route.getRoute().get(aIndex).getStop().equals(A)){
+            aIndex++;
+        }
+
+        while(!route.getRoute().get(aIndex).getStop().equals(B)){
+            distance+=DistanceService.calculateDistance(route.getRoute().get(aIndex), route.getRoute().get(aIndex+1));
+            aIndex++;
+        }
+
+        return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS
     }
 }

@@ -21,7 +21,7 @@ public class StopPeopleStats {
     @JoinColumn(name = "stop_id")
     private Stop stop;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "stop_people_count",
             joinColumns = @JoinColumn(name = "stop_people_stats_id")
