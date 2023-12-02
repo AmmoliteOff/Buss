@@ -43,4 +43,11 @@ public class Bus {
     private double longitude;
 
     private LocalDateTime nextCharge;
+
+    @Override
+    public boolean equals(Object other){
+        if(!(other instanceof Bus c))
+            return false;
+        return c.getId().equals(id);
+    }
 }

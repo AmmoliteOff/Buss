@@ -35,7 +35,7 @@ public class Route {
 
     private int standartStep;
 
-    @OneToMany (mappedBy = "route")
+    @OneToMany (mappedBy = "route", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Waypoint> route;
 

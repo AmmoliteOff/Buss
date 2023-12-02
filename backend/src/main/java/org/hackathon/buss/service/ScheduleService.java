@@ -121,6 +121,53 @@ public class ScheduleService {
         }
     }
 
+    public void returnBus(Bus bus){
+        for (ScheduleConstructor sc:
+                realTimeScheduleConstructorList) {
+            boolean flag = false;
+            for (RoadEntry re:
+                    sc.getA_roadQueue()) {
+                if(re.getBus().equals(bus)){
+                    re.setBus(bus);
+                    flag = true;
+                }
+            }
+            if(!flag){
+                for (RoadEntry re:
+                        sc.getB_roadQueue()) {
+                    if(re.getBus().equals(bus)){
+                        re.setBus(bus);
+                    }
+                }
+            }
+        }
+    }
+    public void busReachedEnd(Bus bus){
+        for (ScheduleConstructor sc:
+             realTimeScheduleConstructorList) {
+            boolean flag = false;
+            for (RoadEntry re:
+                 sc.getA_roadQueue()) {
+                if(re.getBus().equals(bus)){
+                    if(bus.getCharge() > 20)
+                        bus.setStatus(BusStatus.CHARGING);
+                    sc.getB_restQueue().add(bus);
+                    flag = true;
+                }
+            }
+            if(!flag){
+                for (RoadEntry re:
+                        sc.getB_roadQueue()) {
+                    if(re.getBus().equals(bus)){
+                        if(bus.getCharge() > 20)
+                            bus.setStatus(BusStatus.CHARGING);
+                        sc.getA_restQueue().add(bus);
+                    }
+                }
+            }
+        }
+    }
+
     @PostConstruct
     private void init(){
         List<Route> routes = routeService.findAll();
