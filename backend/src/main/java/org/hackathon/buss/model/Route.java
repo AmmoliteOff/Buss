@@ -39,11 +39,12 @@ public class Route {
     @JsonIgnore
     private List<Waypoint> route;
 
-    @OneToMany(mappedBy = "route")
+    @OneToMany(mappedBy = "route", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Bus> buses;
 
-    @OneToMany (mappedBy = "route")
+    @OneToMany (mappedBy = "route", fetch = FetchType.EAGER)
+    @OrderBy("scheduleId ASC")
     private List<Schedule> schedules = new ArrayList<>();
 
     @OneToMany (mappedBy = "route")

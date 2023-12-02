@@ -31,6 +31,7 @@ public class Schedule {
     @JsonIgnore
     private Route route;
 
-    @OneToMany(mappedBy = "schedule")
+    @OneToMany(mappedBy = "schedule", fetch = FetchType.EAGER)
+    @OrderBy("time ASC")
     private List<ScheduleEntry> scheduleEntries = new ArrayList<>();
 }
