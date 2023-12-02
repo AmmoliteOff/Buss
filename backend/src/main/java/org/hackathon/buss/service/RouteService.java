@@ -6,15 +6,15 @@ import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
+import org.hackathon.buss.model.stats.StopPeopleStats;
+import org.hackathon.buss.repository.BusRepository;
 import org.hackathon.buss.repository.RouteRepository;
+import org.hackathon.buss.repository.StopRepository;
 import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static org.hackathon.buss.util.Constants.*;
 
@@ -25,6 +25,7 @@ public class RouteService {
     private final RouteRepository routeRepository;
     private final IntegrationService integrationService;
     private final RouteChangeService routeChangeService;
+    private final StopRepository stopRepository;
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
@@ -34,6 +35,8 @@ public class RouteService {
     }
 
     public Route save(Route route) {
+
+
         for(Waypoint waypoint : route.getRoute()) {
             waypoint.setRoute(route);
         }
@@ -41,7 +44,28 @@ public class RouteService {
             waypoint.setRoute(route.getOppositeRoute());
         }
         route.getOppositeRoute().setOppositeRoute(route);
-        return routeRepository.save(route);
+        var c = routeRepository.save(route);
+
+        var stops =  stopRepository.findAll();
+        Random random = new Random();
+        for (Stop stop:
+             stops) {
+            Map<Integer, StopPeopleStats> map = new HashMap<>();
+            stop.setPeopleStatsMap(map);
+            for(int i = 0; i<7; i++){
+                StopPeopleStats stopPeopleStats = new StopPeopleStats();
+                stopPeopleStats.setStop(stop);
+                Map<Integer, Integer> secondMap = new HashMap<>();
+                for(int j = 1; j<49; j++){
+                    secondMap.put(j, random.nextInt(1, 35));
+                }
+                stopPeopleStats.setPeopleCountByTimeInterval(secondMap);
+                map.put(i+1, stopPeopleStats);
+            }
+            stopRepository.save(stop);
+        }
+
+        return c;
     }
 
     public void delete(Long id) {

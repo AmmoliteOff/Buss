@@ -14,7 +14,7 @@ public class Waypoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long waypointId;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JsonView(DetailedInformation.class)
     private Route route;
 
