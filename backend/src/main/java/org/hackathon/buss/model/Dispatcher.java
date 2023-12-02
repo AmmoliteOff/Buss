@@ -1,12 +1,10 @@
 package org.hackathon.buss.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import lombok.Data;
+import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hackathon.buss.util.view.DetailedInformation;
 
 
@@ -15,7 +13,8 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @DiscriminatorValue("DISPATCHER")
 public class Dispatcher extends User{
 
@@ -29,13 +28,12 @@ public class Dispatcher extends User{
         this.setUsername(user.getUsername());
     }
 
-    @OneToMany(mappedBy = "dispatcher", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "dispatcher", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonView({DetailedInformation.class})
     private List<Event> events;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonView({DetailedInformation.class})
-
     private List<Message> messages;
     public Dispatcher() {
 
