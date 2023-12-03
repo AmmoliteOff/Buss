@@ -41,6 +41,7 @@ public class Route {
 
     @OneToMany (mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
     @JsonView(NonDetailedInformation.class)
+    @OrderBy("waypointId")
     private List<Waypoint> route;
 
     @OneToMany(mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
