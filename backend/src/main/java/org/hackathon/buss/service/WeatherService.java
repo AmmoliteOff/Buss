@@ -1,5 +1,6 @@
 package org.hackathon.buss.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hackathon.buss.dto.WeatherDTO;
 import org.hackathon.buss.model.Weather;
 import org.springframework.http.*;
@@ -10,6 +11,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
+
+@Slf4j
 @Service
 public class WeatherService {
 
@@ -30,7 +33,7 @@ public class WeatherService {
         RequestEntity<Void> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uri);
         WeatherDTO weatherDTO = new RestTemplate().exchange(requestEntity, WeatherDTO.class).getBody();
         weather = WeatherDTO.toWeather(weatherDTO);
-        System.out.println(getCurrentWeather());
+        log.info(getCurrentWeather().toString());
     }
 
     public Weather getCurrentWeather() {
