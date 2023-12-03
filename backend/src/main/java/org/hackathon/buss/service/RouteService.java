@@ -36,7 +36,6 @@ public class RouteService {
 
     public Route save(Route route) {
 
-
         for(Waypoint waypoint : route.getRoute()) {
             waypoint.setRoute(route);
         }
@@ -44,28 +43,30 @@ public class RouteService {
             waypoint.setRoute(route.getOppositeRoute());
         }
         route.getOppositeRoute().setOppositeRoute(route);
-        var c = routeRepository.save(route);
-
-        var stops =  stopRepository.findAll();
+        var resultRoute = routeRepository.save(route);
+        var waypoints = resultRoute.getRoute();
+        waypoints.addAll(resultRoute.getOppositeRoute().getRoute());
         Random random = new Random();
-        for (Stop stop:
-             stops) {
-            Map<Integer, StopPeopleStats> map = new HashMap<>();
-            stop.setPeopleStatsMap(map);
-            for(int i = 0; i<7; i++){
-                StopPeopleStats stopPeopleStats = new StopPeopleStats();
-                stopPeopleStats.setStop(stop);
-                Map<Integer, Integer> secondMap = new HashMap<>();
-                for(int j = 1; j<49; j++){
-                    secondMap.put(j, random.nextInt(1, 35));
+        for (Waypoint waypoint:
+             waypoints) {
+            if(waypoint.getStop()!=null) {
+                var stop = waypoint.getStop();
+                Map<Integer, StopPeopleStats> map = new HashMap<>();
+                stop.setPeopleStatsMap(map);
+                for (int i = 0; i < 7; i++) {
+                    StopPeopleStats stopPeopleStats = new StopPeopleStats();
+                    stopPeopleStats.setStop(stop);
+                    Map<Integer, Integer> secondMap = new HashMap<>();
+                    for (int j = 1; j < 49; j++) {
+                        secondMap.put(j, random.nextInt(1, 35));
+                    }
+                    stopPeopleStats.setPeopleCountByTimeInterval(secondMap);
+                    map.put(i + 1, stopPeopleStats);
                 }
-                stopPeopleStats.setPeopleCountByTimeInterval(secondMap);
-                map.put(i+1, stopPeopleStats);
+                stopRepository.save(stop);
             }
-            stopRepository.save(stop);
         }
-
-        return c;
+        return resultRoute;
     }
 
     public void delete(Long id) {
