@@ -7,10 +7,7 @@ import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.model.stats.StopPeopleStats;
-import org.hackathon.buss.repository.BusRepository;
 import org.hackathon.buss.repository.RouteRepository;
-import org.hackathon.buss.repository.StopRepository;
-import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,8 +21,7 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
     private final IntegrationService integrationService;
-    private final RouteChangeService routeChangeService;
-    private final StopRepository stopRepository;
+    private final StopService stopService;
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
@@ -63,7 +59,7 @@ public class RouteService {
                     stopPeopleStats.setPeopleCountByTimeInterval(secondMap);
                     map.put(i + 1, stopPeopleStats);
                 }
-                stopRepository.save(stop);
+                stopService.save(stop);
             }
         }
         return resultRoute;
@@ -73,14 +69,15 @@ public class RouteService {
         routeRepository.delete(findById(id).orElseThrow());
     }
     public Route update(Long id, RouteChangeDTO routeChangeDTO) {
-        Route route = routeChangeDTO.getRoute();
-        route.setId(id);
+        Route route = findById(id).orElseThrow();
         RouteChange routeChange = new RouteChange();
         routeChange.setTime(LocalDateTime.now());
         routeChange.setReason(routeChangeDTO.getReason());
         routeChange.setRoute(route);
+        route.getOppositeRoute().getChanges().add(routeChange);
+        routeRepository.save(route.getOppositeRoute());
         route.getChanges().add(routeChange);
-        return save(route);
+        return routeRepository.save(route);
     }
 
     public int getNorm(Route route, int dayOfWeek, int timeInterval){

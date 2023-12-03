@@ -23,8 +23,8 @@ public class RouteController {
     private final ScheduleService scheduleService;
     private final BusService busService;
 
-    @JsonView(NonDetailedInformation.class)
     @GetMapping("/{id}")
+    @JsonView(NonDetailedInformation.class)
     public ResponseEntity<Route> getRoute(@PathVariable Long id) {
         Route route = routeService.findById(id).orElse(null);
         return ResponseEntity.ok(route);
@@ -36,13 +36,14 @@ public class RouteController {
         return ResponseEntity.ok(routes);
     }
 
-    @JsonView(NonDetailedInformation.class)
     @PostMapping()
+    @JsonView(NonDetailedInformation.class)
     public  ResponseEntity<Route> addRoute(@RequestBody Route route) {
         return ResponseEntity.ok(routeService.save(route));
     }
 
     @PatchMapping("/{id}")
+    @JsonView(NonDetailedInformation.class)
     public  ResponseEntity<Route> updateRoute(@PathVariable Long id, @RequestBody RouteChangeDTO routeChangeDTO) {
         return ResponseEntity.ok(routeService.update(id, routeChangeDTO));
     }

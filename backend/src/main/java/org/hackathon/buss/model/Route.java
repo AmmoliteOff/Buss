@@ -53,7 +53,7 @@ public class Route {
     @JsonView(DetailedInformation.class)
     private List<Schedule> schedules = new ArrayList<>();
 
-    @OneToMany (mappedBy = "route")
+    @OneToMany (mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
     @JsonView(DetailedInformation.class)
     private List<RouteChange> changes;
 
