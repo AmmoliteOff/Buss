@@ -35,4 +35,8 @@ public class StopService {
         newStop.setId(id);
         return save(newStop);
     }
+
+    public Optional<Stop> findByTitle (String title) {
+        return stopRepository.findByTitle(title);
+    }
 }

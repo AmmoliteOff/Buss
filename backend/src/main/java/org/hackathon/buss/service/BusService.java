@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.Bus;
+import org.hackathon.buss.model.Route;
 import org.hackathon.buss.repository.BusRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,9 @@ public class BusService {
         busRepository.delete(findById(id).orElseThrow());
     }
 
+    public List<Bus> findByRoute(Route route){
+        return busRepository.findAllByRoute(route);
+    }
     public Bus update(BusDTO busDTO) {
         var bus = busRepository.findById(busDTO.getBusId()).get();
         bus.setCharge(busDTO.getCharge());

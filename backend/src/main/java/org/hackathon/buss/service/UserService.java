@@ -32,11 +32,12 @@ public class UserService {
         Dispatcher minLoadeddDispatcher = null;
         int minLoad = Integer.MAX_VALUE;
         for (Dispatcher dispatcher : dispatchers) {
-            if(dispatcher.getEvents().size() < minLoad) {
-                minLoad = dispatcher.getEvents().size();
+            int load = dispatcher.getEvents().size();
+            if(load < minLoad) {
+                minLoad = load;
                 minLoadeddDispatcher = dispatcher;
             }
         }
-        return minLoadeddDispatcher;
+        return minLoadeddDispatcher == null ? dispatchers.get(0) : minLoadeddDispatcher;
     }
 }
