@@ -32,6 +32,7 @@ public class RouteController {
     }
 
     @GetMapping("")
+    @JsonView(NonDetailedInformation.class)
     public ResponseEntity<List<Route>> getAllRoutes() {
         List<Route> routes = routeService.findAll();
         return ResponseEntity.ok(routes);
@@ -41,19 +42,7 @@ public class RouteController {
     @JsonView(NonDetailedInformation.class)
     public  ResponseEntity<List<Route>> addRoute(@RequestBody RouteDTO routeDTO) {
         List<Route> savedRoute = routeService.save(routeDTO.getRoute(), routeDTO.getOppositeRoute());
-//        RouteDTO routeDTO = RouteDTO.builder()
-//                .route(savedRoute)
-//                .oppositeRouteId(savedRoute.getOppositeRoute().getId())
-//                .build();
-        return ResponseEntity.ok(savedRoute); ///
-    }
-
-    @PatchMapping("/{id}")
-    @JsonView(NonDetailedInformation.class)
-    public  ResponseEntity<RouteDTO> updateRoute(@PathVariable Long id, @RequestBody RouteChangeDTO routeChangeDTO) {
-       Route route = routeService.update(id, routeChangeDTO);
-        //DTO
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(savedRoute);
     }
 
     @DeleteMapping("/{id}")

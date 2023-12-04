@@ -101,18 +101,6 @@ public class RouteService {
     public void delete(Long id) {
         routeRepository.delete(findById(id).orElseThrow());
     }
-    public Route update(Long id, RouteChangeDTO routeChangeDTO) {
-        Route route = findById(id).orElseThrow();
-        var oppositeRoute = routeRepository.findById(route.getOppositeRouteId()).get();
-        RouteChange routeChange = new RouteChange();
-        routeChange.setTime(LocalDateTime.now());
-        routeChange.setReason(routeChangeDTO.getReason());
-        routeChange.setRoute(route);
-        oppositeRoute.getChanges().add(routeChange);
-        routeRepository.save(oppositeRoute);
-        route.getChanges().add(routeChange);
-        return routeRepository.save(route);
-    }
 
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
 //        int value = 0;
