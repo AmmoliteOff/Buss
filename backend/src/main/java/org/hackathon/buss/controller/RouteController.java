@@ -24,16 +24,12 @@ public class RouteController {
     private final ScheduleService scheduleService;
     private final BusService busService;
 
-    //@GetMapping("/{id}")
-    //@JsonView(NonDetailedInformation.class)
-//    public ResponseEntity<RouteDTO> getRoute(@PathVariable Long id) {
-//        Route route = routeService.findById(id).orElse(null);
-//        RouteDTO routeDTO = RouteDTO.builder()
-//                .route(route)
-//                .oppositeRouteId(route.getOppositeRoute().getId())
-//                .build();
-//        return ResponseEntity.ok(routeDTO);
-//    }
+    @GetMapping("/{id}")
+    @JsonView(NonDetailedInformation.class)
+    public ResponseEntity<Route> getRoute(@PathVariable Long id) {
+        Route route = routeService.findById(id).orElse(null);
+        return ResponseEntity.ok(route);
+    }
 
     @GetMapping("")
     public ResponseEntity<List<Route>> getAllRoutes() {
