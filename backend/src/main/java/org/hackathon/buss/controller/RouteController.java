@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.dto.RouteChangeDTO;
+import org.hackathon.buss.dto.RouteDTO;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.service.BusService;
 import org.hackathon.buss.service.RouteService;
@@ -25,9 +26,13 @@ public class RouteController {
 
     @GetMapping("/{id}")
     @JsonView(NonDetailedInformation.class)
-    public ResponseEntity<Route> getRoute(@PathVariable Long id) {
+    public ResponseEntity<RouteDTO> getRoute(@PathVariable Long id) {
         Route route = routeService.findById(id).orElse(null);
-        return ResponseEntity.ok(route);
+        RouteDTO routeDTO = RouteDTO.builder()
+                .route(route)
+                .oppositeRouteId(route.getOppositeRoute().getId())
+                .build();
+        return ResponseEntity.ok(routeDTO);
     }
 
     @GetMapping("")
@@ -38,20 +43,30 @@ public class RouteController {
 
     @PostMapping()
     @JsonView(NonDetailedInformation.class)
-    public  ResponseEntity<Route> addRoute(@RequestBody Route route) {
-        return ResponseEntity.ok(routeService.save(route));
+    public  ResponseEntity<RouteDTO> addRoute(@RequestBody Route route) {
+        Route savedRoute = routeService.save(route);
+        RouteDTO routeDTO = RouteDTO.builder()
+                .route(savedRoute)
+                .oppositeRouteId(savedRoute.getOppositeRoute().getId())
+                .build();
+        return ResponseEntity.ok(routeDTO);
     }
 
     @PatchMapping("/{id}")
     @JsonView(NonDetailedInformation.class)
-    public  ResponseEntity<Route> updateRoute(@PathVariable Long id, @RequestBody RouteChangeDTO routeChangeDTO) {
-        return ResponseEntity.ok(routeService.update(id, routeChangeDTO));
+    public  ResponseEntity<RouteDTO> updateRoute(@PathVariable Long id, @RequestBody RouteChangeDTO routeChangeDTO) {
+       Route route = routeService.update(id, routeChangeDTO);
+       RouteDTO routeDTO = RouteDTO.builder()
+                .route(route)
+                .oppositeRouteId(route.getOppositeRoute().getId())
+                .build();
+        return ResponseEntity.ok(routeDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Route> deleteRoute(@PathVariable Long id) {
+    public ResponseEntity<?> deleteRoute(@PathVariable Long id) {
         routeService.delete(id);
-        return ResponseEntity.ok(new Route());
+        return ResponseEntity.ok("OK");
     }
 
 

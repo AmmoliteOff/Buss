@@ -46,7 +46,7 @@ public class RouteService {
         }
         route.getOppositeRoute().setOppositeRoute(route);
         var resultRoute = routeRepository.save(route);
-        var waypoints = resultRoute.getRoute();
+        List<Waypoint> waypoints = new ArrayList<>(List.copyOf(resultRoute.getRoute()));
         waypoints.addAll(resultRoute.getOppositeRoute().getRoute());
         Random random = new Random();
         for (Waypoint waypoint:
