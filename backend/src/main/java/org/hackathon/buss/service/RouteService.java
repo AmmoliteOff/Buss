@@ -117,7 +117,7 @@ public class RouteService {
         var r1= routeRepository.save(route1);
         route2.setOppositeRouteId(r1.getId());
         var r2 = routeRepository.save(route2);
-        r1.setOppositeRouteId(r2.getOppositeRouteId());
+        r1.setOppositeRouteId(r2.getId());
         routeRepository.save(r1);
         result.add(r1);
         result.add(r2);
