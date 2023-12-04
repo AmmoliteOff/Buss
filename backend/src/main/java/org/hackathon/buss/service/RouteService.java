@@ -35,6 +35,7 @@ public class RouteService {
         var result = new ArrayList<Route>();
         for (Waypoint waypoint:
              route1.getWaypoints()) {
+            waypoint.setRoute(route1);
             if(waypoint.getStop()!=null){
                 var stop = stopService.findByTitle(waypoint.getStop().getTitle());
                 stop.ifPresent(waypoint::setStop);
@@ -61,6 +62,7 @@ public class RouteService {
         for (Waypoint waypoint:
                 route2.getWaypoints()) {
             if(waypoint.getStop()!=null){
+                waypoint.setRoute(route2);
                 var stop = stopService.findByTitle(waypoint.getStop().getTitle());
                 stop.ifPresent(waypoint::setStop);
                 if(stop.isEmpty()){
