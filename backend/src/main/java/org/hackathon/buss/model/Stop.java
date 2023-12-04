@@ -31,7 +31,7 @@ public class Stop {
     private String title;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL)
     private Map<Integer, StopPeopleStats> peopleStatsMap = new HashMap<>();
 
     @Override
