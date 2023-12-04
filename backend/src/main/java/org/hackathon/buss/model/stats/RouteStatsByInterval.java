@@ -1,15 +1,13 @@
 package org.hackathon.buss.model.stats;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
 public class RouteStatsByInterval {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long routeStatsByIntervalId;
 
     @ManyToOne

@@ -6,6 +6,8 @@ import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
+import org.hackathon.buss.model.stats.RouteStatsByDay;
+import org.hackathon.buss.model.stats.RouteStatsByInterval;
 import org.hackathon.buss.model.stats.StopStatsByDay;
 import org.hackathon.buss.model.stats.StopStatsByInterval;
 import org.hackathon.buss.repository.RouteRepository;
@@ -33,6 +35,35 @@ public class RouteService {
 
     public List<Route> save(Route route1, Route route2) {
         var result = new ArrayList<Route>();
+        route1.setRouteStatsByWeek(new ArrayList<>());
+        route2.setRouteStatsByWeek(new ArrayList<>());
+        Random random = new Random();
+        for(int i = 0; i<7; i++) {
+            RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
+            routeStatsByDay.setRouteStatsByIntervalList(new ArrayList<>());
+            routeStatsByDay.setRoute(route1);
+            for(int j = 0; j<48; j++){
+                RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
+                routeStatsByInterval.setRouteStatsByDay(routeStatsByDay);
+                routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
+                routeStatsByDay.getRouteStatsByIntervalList().add(routeStatsByInterval);
+            }
+            route1.getRouteStatsByWeek().add(routeStatsByDay);
+        }
+
+        for(int i = 0; i<7; i++) {
+            RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
+            routeStatsByDay.setRouteStatsByIntervalList(new ArrayList<>());
+            routeStatsByDay.setRoute(route2);
+            for(int j = 0; j<48; j++){
+                RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
+                routeStatsByInterval.setRouteStatsByDay(routeStatsByDay);
+                routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
+                routeStatsByDay.getRouteStatsByIntervalList().add(routeStatsByInterval);
+            }
+            route2.getRouteStatsByWeek().add(routeStatsByDay);
+        }
+
         for (Waypoint waypoint:
              route1.getWaypoints()) {
             waypoint.setRoute(route1);
@@ -42,7 +73,6 @@ public class RouteService {
                 if(stop.isEmpty()){
                     var currentStop = waypoint.getStop();
                     currentStop.setStatsByWeek(new ArrayList<>());
-                    Random random = new Random();
                     for(int i = 0; i<7; i++){
                         var stopStats = new StopStatsByDay();
                         stopStats.setStopStatsByIntervalList(new ArrayList<>());
@@ -68,7 +98,6 @@ public class RouteService {
                 if(stop.isEmpty()){
                     var currentStop = waypoint.getStop();
                     currentStop.setStatsByWeek(new ArrayList<>());
-                    Random random = new Random();
                     for(int i = 0; i<7; i++){
                         var stopStats = new StopStatsByDay();
                         stopStats.setStopStatsByIntervalList(new ArrayList<>());
