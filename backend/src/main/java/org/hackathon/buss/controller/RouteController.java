@@ -24,16 +24,16 @@ public class RouteController {
     private final ScheduleService scheduleService;
     private final BusService busService;
 
-    @GetMapping("/{id}")
-    @JsonView(NonDetailedInformation.class)
-    public ResponseEntity<RouteDTO> getRoute(@PathVariable Long id) {
-        Route route = routeService.findById(id).orElse(null);
-        RouteDTO routeDTO = RouteDTO.builder()
-                .route(route)
-                .oppositeRouteId(route.getOppositeRoute().getId())
-                .build();
-        return ResponseEntity.ok(routeDTO);
-    }
+    //@GetMapping("/{id}")
+    //@JsonView(NonDetailedInformation.class)
+//    public ResponseEntity<RouteDTO> getRoute(@PathVariable Long id) {
+//        Route route = routeService.findById(id).orElse(null);
+//        RouteDTO routeDTO = RouteDTO.builder()
+//                .route(route)
+//                .oppositeRouteId(route.getOppositeRoute().getId())
+//                .build();
+//        return ResponseEntity.ok(routeDTO);
+//    }
 
     @GetMapping("")
     public ResponseEntity<List<Route>> getAllRoutes() {
@@ -43,24 +43,21 @@ public class RouteController {
 
     @PostMapping()
     @JsonView(NonDetailedInformation.class)
-    public  ResponseEntity<RouteDTO> addRoute(@RequestBody Route route) {
-        Route savedRoute = routeService.save(route);
-        RouteDTO routeDTO = RouteDTO.builder()
-                .route(savedRoute)
-                .oppositeRouteId(savedRoute.getOppositeRoute().getId())
-                .build();
-        return ResponseEntity.ok(routeDTO);
+    public  ResponseEntity<List<Route>> addRoute(@RequestBody RouteDTO routeDTO) {
+        List<Route> savedRoute = routeService.save(routeDTO.getRoute(), routeDTO.getOppositeRoute());
+//        RouteDTO routeDTO = RouteDTO.builder()
+//                .route(savedRoute)
+//                .oppositeRouteId(savedRoute.getOppositeRoute().getId())
+//                .build();
+        return ResponseEntity.ok(savedRoute); ///
     }
 
     @PatchMapping("/{id}")
     @JsonView(NonDetailedInformation.class)
     public  ResponseEntity<RouteDTO> updateRoute(@PathVariable Long id, @RequestBody RouteChangeDTO routeChangeDTO) {
        Route route = routeService.update(id, routeChangeDTO);
-       RouteDTO routeDTO = RouteDTO.builder()
-                .route(route)
-                .oppositeRouteId(route.getOppositeRoute().getId())
-                .build();
-        return ResponseEntity.ok(routeDTO);
+        //DTO
+        return ResponseEntity.ok(null);
     }
 
     @DeleteMapping("/{id}")
@@ -78,7 +75,7 @@ public class RouteController {
 
     @PostMapping("/finish")
     public ResponseEntity<String> routeEnd(@RequestBody BusDTO busDto){
-        scheduleService.busReachedEnd(busService.findById(busDto.getBusId()).get());
+        //scheduleService.busReachedEnd(busService.findById(busDto.getBusId()).get());
         return ResponseEntity.ok("OK");
     }
 }

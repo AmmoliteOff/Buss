@@ -19,7 +19,7 @@ public class WeatherService {
 
     private Weather weather;
 
-    @Scheduled(fixedDelay = 1000 * 60 * 30)
+    //@Scheduled(fixedDelay = 1000 * 60 * 30)
     private void updateWeather() {
         WeatherDTO weatherDTO = weatherRequest();
         weather = toWeather(weatherDTO);

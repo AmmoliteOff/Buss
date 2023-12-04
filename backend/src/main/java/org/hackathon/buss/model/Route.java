@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hackathon.buss.model.stats.RouteStatsByDay;
 import org.hackathon.buss.util.view.DetailedInformation;
 import org.hackathon.buss.util.view.NonDetailedInformation;
 
@@ -26,10 +27,7 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "opposite_route_id")
-    @JsonView(DetailedInformation.class)
-    private Route oppositeRoute;
+    private Long oppositeRouteId;
 
     private LocalDateTime startTime;
 
@@ -37,12 +35,12 @@ public class Route {
 
     private String title;
 
-    private int standartStep;
+    private int normalStep;
 
     @OneToMany (mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
     @JsonView(NonDetailedInformation.class)
     @OrderBy("waypointId")
-    private List<Waypoint> route;
+    private List<Waypoint> waypoints;
 
     @OneToMany(mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
     @JsonView(DetailedInformation.class)
@@ -56,6 +54,10 @@ public class Route {
     @OneToMany (mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
     @JsonView(DetailedInformation.class)
     private List<RouteChange> changes;
+
+    @JsonView(DetailedInformation.class)
+    @OneToMany(mappedBy = "route")
+    private List<RouteStatsByDay> routeStatsByWeek;
 
     @Override
     public boolean equals(Object o){

@@ -1,18 +1,16 @@
 package org.hackathon.buss.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hackathon.buss.model.stats.StopPeopleStats;
+import org.hackathon.buss.model.stats.StopStatsByDay;
 import org.hackathon.buss.util.view.DetailedInformation;
 import org.hackathon.buss.util.view.NonDetailedInformation;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Data
 @Builder
@@ -30,9 +28,9 @@ public class Stop {
     @Column(unique = true)
     private String title;
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    private Map<Integer, StopPeopleStats> peopleStatsMap = new HashMap<>();
+    @OneToMany(mappedBy = "stop", cascade = CascadeType.ALL)
+    @JsonView({DetailedInformation.class})
+    List<StopStatsByDay> statsByWeek;
 
     @Override
     public boolean equals(Object stop){

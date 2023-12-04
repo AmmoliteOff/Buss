@@ -1,0 +1,23 @@
+package org.hackathon.buss.model.stats;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import lombok.Data;
+import org.hackathon.buss.model.Route;
+
+import java.util.List;
+
+@Entity
+@Data
+public class RouteStatsByDay {
+    @Id
+    private Long routeStatsByDayId;
+
+    @ManyToOne
+    private Route route;
+
+    @OneToMany(mappedBy = "routeStatsByDay")
+    private List<RouteStatsByInterval> routeStatsByIntervalList;
+}

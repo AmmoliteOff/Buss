@@ -12,5 +12,5 @@ import org.hackathon.buss.util.view.NonDetailedInformation;
 public class RouteDTO {
     private Route route;
 
-    private Long oppositeRouteId;
+    private Route oppositeRoute;
 }
