@@ -6,7 +6,6 @@ import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +27,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final BusService busService;
 
-    private List<ScheduleConstructor> realTimeScheduleConstructorList = new ArrayList<>();
+    private List<ScheduleConstructor> realTimeScheduleConstructorList;
     private int getCurrentTimeIntervalInt() {
         var time = LocalDateTime.now();
         int minute = time.getMinute();
@@ -383,6 +382,7 @@ public class ScheduleService {
                 for (int i = 0; i < ARealNorm; i++){
                     sc.getA().getSchedules().add(createRealSchedule(currentTime.plusMinutes((long) AStep *i), sc.getA()));
                 }
+                //notify users
             }
 
             if(Math.abs(BRealNorm - BStatsNorm) >= 2) {

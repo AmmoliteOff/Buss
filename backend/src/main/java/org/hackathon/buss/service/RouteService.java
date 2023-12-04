@@ -33,9 +33,15 @@ public class RouteService {
     public Route save(Route route) {
 
         for(Waypoint waypoint : route.getRoute()) {
+            if(waypoint.getStop() != null && stopService.findByTitle(waypoint.getStop().getTitle()).isPresent()) {
+                waypoint.setStop(stopService.findByTitle(waypoint.getStop().getTitle()).get());
+            }
             waypoint.setRoute(route);
         }
         for(Waypoint waypoint : route.getOppositeRoute().getRoute()) {
+            if(waypoint.getStop() != null && stopService.findByTitle(waypoint.getStop().getTitle()).isPresent()) {
+                waypoint.setStop(stopService.findByTitle(waypoint.getStop().getTitle()).get());
+            }
             waypoint.setRoute(route.getOppositeRoute());
         }
         route.getOppositeRoute().setOppositeRoute(route);
@@ -45,21 +51,21 @@ public class RouteService {
         Random random = new Random();
         for (Waypoint waypoint:
              waypoints) {
-            if(waypoint.getStop()!=null) {
-                var stop = waypoint.getStop();
-                Map<Integer, StopPeopleStats> map = new HashMap<>();
-                stop.setPeopleStatsMap(map);
-                for (int i = 0; i < 7; i++) {
-                    StopPeopleStats stopPeopleStats = new StopPeopleStats();
-                    stopPeopleStats.setStop(stop);
-                    Map<Integer, Integer> secondMap = new HashMap<>();
-                    for (int j = 1; j < 49; j++) {
-                        secondMap.put(j, random.nextInt(1, 35));
+            if(waypoint.getStop()!=null && waypoint.getStop().getPeopleStatsMap().isEmpty()) {
+                    var stop = waypoint.getStop();
+                    Map<Integer, StopPeopleStats> map = new HashMap<>();
+                    stop.setPeopleStatsMap(map);
+                    for (int i = 0; i < 7; i++) {
+                        StopPeopleStats stopPeopleStats = new StopPeopleStats();
+                        stopPeopleStats.setStop(stop);
+                        Map<Integer, Integer> secondMap = new HashMap<>();
+                        for (int j = 1; j < 49; j++) {
+                            secondMap.put(j, random.nextInt(1, 35));
+                        }
+                        stopPeopleStats.setPeopleCountByTimeInterval(secondMap);
+                        map.put(i + 1, stopPeopleStats);
                     }
-                    stopPeopleStats.setPeopleCountByTimeInterval(secondMap);
-                    map.put(i + 1, stopPeopleStats);
-                }
-                stopService.save(stop);
+                    stopService.save(stop);
             }
         }
         return resultRoute;

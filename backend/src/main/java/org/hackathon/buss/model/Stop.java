@@ -27,10 +27,11 @@ public class Stop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String title;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Map<Integer, StopPeopleStats> peopleStatsMap = new HashMap<>();
 
     @Override
