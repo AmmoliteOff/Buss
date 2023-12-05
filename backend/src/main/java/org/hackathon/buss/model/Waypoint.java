@@ -27,11 +27,18 @@ public class Waypoint {
     private Stop stop;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "waypoint", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "waypoint", cascade = CascadeType.ALL)
     private List<WaypointLoadscoreStatsByDay> waypointLoadscoreStatsByDayList;
 
     private int currentLoadScore;
 
     private double longitude;
     private double latitude;
+
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof Waypoint waypoint))
+            return false;
+        return waypoint.getWaypointId().equals(waypointId);
+    }
 }

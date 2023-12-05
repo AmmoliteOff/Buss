@@ -8,4 +8,5 @@ public class BusDTO {
     private double charge;
     private double longitude;
     private double latitude;
+    private boolean isCharging = false;
 }
