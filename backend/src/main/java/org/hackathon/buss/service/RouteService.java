@@ -6,10 +6,7 @@ import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
-import org.hackathon.buss.model.stats.RouteStatsByDay;
-import org.hackathon.buss.model.stats.RouteStatsByInterval;
-import org.hackathon.buss.model.stats.StopStatsByDay;
-import org.hackathon.buss.model.stats.StopStatsByInterval;
+import org.hackathon.buss.model.stats.*;
 import org.hackathon.buss.repository.RouteRepository;
 import org.springframework.stereotype.Service;
 
@@ -38,30 +35,56 @@ public class RouteService {
         route1.setRouteStatsByWeek(new ArrayList<>());
         route2.setRouteStatsByWeek(new ArrayList<>());
         Random random = new Random();
+
+        route1.setRouteStatsByWeek(new ArrayList<>());
+        route2.setRouteStatsByWeek(new ArrayList<>());
+
         for(int i = 0; i<7; i++) {
-            RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
-            routeStatsByDay.setRouteStatsByIntervalList(new ArrayList<>());
-            routeStatsByDay.setRoute(route1);
-            for(int j = 0; j<48; j++){
-                RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
-                routeStatsByInterval.setRouteStatsByDay(routeStatsByDay);
-                routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
-                routeStatsByDay.getRouteStatsByIntervalList().add(routeStatsByInterval);
+            if(route1.getRouteStatsByWeek() == null) {
+                RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
+                routeStatsByDay.setRouteStatsByStopList(new ArrayList<>());
+                routeStatsByDay.setRoute(route1);
+                for (Waypoint waypoint : route1.getWaypoints()) {
+                    if (waypoint.getStop() != null) {
+                        RouteStatsByStop routeStatsByStop = new RouteStatsByStop();
+                        routeStatsByStop.setRouteStatsByIntervalList(new ArrayList<>());
+                        routeStatsByStop.setStop(waypoint.getStop());
+                        routeStatsByStop.setRouteStatsByDay(routeStatsByDay);
+                        for (int j = 0; j < 48; j++) {
+                            RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
+                            routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
+                            routeStatsByInterval.setRouteStatsByStop(routeStatsByStop);
+                            routeStatsByStop.getRouteStatsByIntervalList().add(routeStatsByInterval);
+                        }
+                        routeStatsByDay.getRouteStatsByStopList().add(routeStatsByStop);
+                    }
+                }
+                route1.getRouteStatsByWeek().add(routeStatsByDay);
             }
-            route1.getRouteStatsByWeek().add(routeStatsByDay);
         }
 
         for(int i = 0; i<7; i++) {
-            RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
-            routeStatsByDay.setRouteStatsByIntervalList(new ArrayList<>());
-            routeStatsByDay.setRoute(route2);
-            for(int j = 0; j<48; j++){
-                RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
-                routeStatsByInterval.setRouteStatsByDay(routeStatsByDay);
-                routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
-                routeStatsByDay.getRouteStatsByIntervalList().add(routeStatsByInterval);
+            if(route2.getRouteStatsByWeek() == null) {
+                RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
+                routeStatsByDay.setRouteStatsByStopList(new ArrayList<>());
+                routeStatsByDay.setRoute(route2);
+                for (Waypoint waypoint : route2.getWaypoints()) {
+                    if (waypoint.getStop() != null) {
+                        RouteStatsByStop routeStatsByStop = new RouteStatsByStop();
+                        routeStatsByStop.setRouteStatsByIntervalList(new ArrayList<>());
+                        routeStatsByStop.setStop(waypoint.getStop());
+                        routeStatsByStop.setRouteStatsByDay(routeStatsByDay);
+                        for (int j = 0; j < 48; j++) {
+                            RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
+                            routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
+                            routeStatsByInterval.setRouteStatsByStop(routeStatsByStop);
+                            routeStatsByStop.getRouteStatsByIntervalList().add(routeStatsByInterval);
+                        }
+                        routeStatsByDay.getRouteStatsByStopList().add(routeStatsByStop);
+                    }
+                }
+                route2.getRouteStatsByWeek().add(routeStatsByDay);
             }
-            route2.getRouteStatsByWeek().add(routeStatsByDay);
         }
 
         for (Waypoint waypoint:
@@ -91,8 +114,8 @@ public class RouteService {
 
         for (Waypoint waypoint:
                 route2.getWaypoints()) {
+            waypoint.setRoute(route2);
             if(waypoint.getStop()!=null){
-                waypoint.setRoute(route2);
                 var stop = stopService.findByTitle(waypoint.getStop().getTitle());
                 stop.ifPresent(waypoint::setStop);
                 if(stop.isEmpty()){
@@ -121,9 +144,6 @@ public class RouteService {
         routeRepository.save(r1);
         result.add(r1);
         result.add(r2);
-
-
-
         return result;
     }
 
@@ -132,20 +152,13 @@ public class RouteService {
     }
 
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
-//        int value = 0;
-//        for (Waypoint waypoint:
-//             route.getWaypoints()) {
-//            if(waypoint.getStop()!=null){
-//                value += waypoint.getStop()
-//                        .getPeopleStatsMap()
-//                        .get(dayOfWeek)
-//                        .getPeopleCountByTimeInterval()
-//                        .get(timeInterval);
-//            }
-//        }
-//        var norm = (int) Math.ceil(value/BUS_CAPACITY);
-//        return Math.max(norm, INTERVAL / route.getNormalStep());
-        return 0;
+        int value = 0;
+        var dayStats = route.getRouteStatsByWeek().get(dayOfWeek-1);
+        for(var routeStatsByStop: dayStats.getRouteStatsByStopList()){
+            value+= routeStatsByStop.getRouteStatsByIntervalList().get(timeInterval).getPeopleGoInBus();
+        }
+        var norm = (int) Math.ceil(value/BUS_CAPACITY);
+        return Math.max(norm, INTERVAL / route.getNormalStep());
     }
 
     public double getFullDistance(Route route){
@@ -156,6 +169,13 @@ public class RouteService {
         return distance;
     }
 
+    public int getFullTime(Route route, int dayOfWeek, int timeInterval){
+        double distance = 0;
+        for(int i = 1; i<route.getWaypoints().size(); i++){
+            distance+= DistanceService.calculateDistance(route.getWaypoints().get(i-1), route.getWaypoints().get(i));
+        }
+        return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0));
+    }
     public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
        double distance = 0;
 
@@ -178,7 +198,7 @@ public class RouteService {
         for (Waypoint waypoint:
                 route.getWaypoints()) {
             if(waypoint.getStop()!=null){
-                value += integrationService.getPeopleCount(waypoint.getStop());
+                value += integrationService.getPeopleCount(waypoint.getStop()); //STATS PERCENT
             }
         }
         var norm = (int) Math.ceil(value/BUS_CAPACITY);

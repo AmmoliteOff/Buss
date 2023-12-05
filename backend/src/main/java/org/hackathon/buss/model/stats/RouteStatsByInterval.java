@@ -2,6 +2,7 @@ package org.hackathon.buss.model.stats;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hackathon.buss.model.Stop;
 
 @Entity
 @Data
@@ -11,7 +12,7 @@ public class RouteStatsByInterval {
     private Long routeStatsByIntervalId;
 
     @ManyToOne
-    private RouteStatsByDay routeStatsByDay;
+    private RouteStatsByStop routeStatsByStop;
 
     private int peopleGoInBus;
 }

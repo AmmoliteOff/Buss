@@ -17,5 +17,5 @@ public class RouteStatsByDay {
     private Route route;
 
     @OneToMany(mappedBy = "routeStatsByDay", cascade = CascadeType.ALL)
-    private List<RouteStatsByInterval> routeStatsByIntervalList;
+    private List<RouteStatsByStop> routeStatsByStopList;
 }

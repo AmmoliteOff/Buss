@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -86,68 +87,42 @@ public class ScheduleService {
 
     }
 
-    private Schedule createSchedule(Queue<LocalDateTime> queue, LocalDateTime time, Route route){
-        Schedule schedule = null;
-        if(!queue.isEmpty()) {
-            var request = queue.peek();
-            if (request.getHour() * 60 + request.getMinute() <= time.getHour() * 60 + time.getMinute()) {
-                Stop prevStop = null;
-                var arrivalTime = time.plusMinutes(0);
-                schedule = new Schedule();
-                scheduleRepository.save(schedule);
-                queue.poll();
-                for (int j = 0; j < route.getWaypoints().size(); j++) {
-                    if (route.getWaypoints().get(j).getStop() != null) {
-                        if (prevStop != null) {
-                            arrivalTime = arrivalTime.plusMinutes(routeService
-                                    .getAverageStopToStopTime(getTimeIntervalByDate(time), route, prevStop, route.getWaypoints().get(j).getStop()));
-                        }
-                        var entry = new ScheduleEntry(
-                                arrivalTime,
-                                schedule,
-                                route.getWaypoints().get(j).getStop());
-                        entry.setSchedule(schedule);
+   private void sendBus(Route route, Queue<LocalDateTime> requestQueue, Queue<Bus> restQueue, Queue<RoadEntry> roadQueue, LocalDateTime time) {
+       Schedule schedule = null;
 
+       if (!requestQueue.isEmpty()) {
+           var request = requestQueue.peek();
+           if (request.getMinute() + request.getHour() * 60 <= time.getHour() * 60 + time.getMinute()) {
+               Queue<Bus> returnQueue = new LinkedList<Bus>();
+               while (!restQueue.isEmpty()) {
+                   var bus = restQueue.poll();
+                   if (bus.getStatus() == BusStatus.READY) {
+                       requestQueue.poll();
+                       schedule = new Schedule();
+                       schedule.setStartTime(time);
+                       schedule.setRoute(route);
+                       schedule.setBus(bus);
+                       schedule.setEndTime(time.plusMinutes(routeService.getFullTime(route,
+                               LocalDateTime.now().getDayOfWeek().getValue(),
+                               getTimeIntervalByDate(time))));
+                       route.getSchedules().add(schedule);
+                       roadQueue.add(
+                               new RoadEntry(
+                                       bus,
+                                       schedule.getEndTime()
+                               )
+                       );
+                       break;
+                   } else
+                       returnQueue.add(bus);
+               }
+               while (!returnQueue.isEmpty()) {
+                   restQueue.add(returnQueue.poll());
+               }
+           }
+       }
+   }
 
-                        schedule.getScheduleEntries().add(
-                                entry
-                        );
-                        scheduleEntryReposirory.save(entry);
-                        prevStop = route.getWaypoints().get(j).getStop();
-                    }
-                }
-                schedule.setRoute(route);
-                route.getSchedules().add(schedule);
-                scheduleRepository.save(schedule);
-            }
-        }
-        return schedule;
-    }
-    private void checkToSend(Queue<Bus> restQueue, Queue<LocalDateTime> requestQueue, Queue<RoadEntry> roadQueue, LocalDateTime timeInterval, Route route){
-        int checkAmount = restQueue.size();
-        for (int i = 0; i < checkAmount; i++) {
-            var bus = restQueue.peek();
-            if (bus.getStatus() == BusStatus.READY) {
-                Schedule schedule = createSchedule(requestQueue, timeInterval, route);
-                if (schedule != null) {
-                    schedule.setBus(bus);
-                    bus.setStatus(BusStatus.IN_ROAD);
-                    scheduleRepository.save(schedule);
-                    bus.setSchedule(schedule);
-                    busService.save(bus);
-                    restQueue.poll();
-                    roadQueue.add(
-                            new RoadEntry(
-                                    bus,
-                                    schedule.getScheduleEntries()
-                                            .get(schedule.getScheduleEntries().size() - 1)
-                                            .getTime()
-                            )
-                    );
-                }
-            }
-        }
-    }
 
     //    0 - static
     //    1 - based on statistic
@@ -255,8 +230,17 @@ public class ScheduleService {
                     }
                 }
 
-                checkToSend(sc.getA_restQueue(), sc.getA_requestQueue(), sc.getA_roadQueue(), time, sc.getA());
-                checkToSend(sc.getB_restQueue(), sc.getB_requestQueue(), sc.getB_roadQueue(), time, sc.getB());
+                sendBus(sc.getA(),
+                        sc.getA_requestQueue(),
+                        sc.getA_restQueue(),
+                        sc.getA_roadQueue(),
+                        time);
+
+               sendBus(sc.getB(),
+                       sc.getB_requestQueue(),
+                       sc.getB_restQueue(),
+                       sc.getB_roadQueue(),
+                       time);
 
                 time = time.plusMinutes(1);
             }
