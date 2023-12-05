@@ -32,7 +32,7 @@ public class Chat {
 //    @JoinColumn(name = "supervisor_id")
 //    private Supervisor supervisor;
 
-    @OneToMany(mappedBy = "chat")
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
 }
