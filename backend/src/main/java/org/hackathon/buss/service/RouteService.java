@@ -40,9 +40,13 @@ public class RouteService {
                 routeStatsByDay.setRoute(route);
                 for (Waypoint waypoint : route.getWaypoints()) {
                     if (waypoint.getStop() != null) {
+                        var stop = waypoint.getStop();
+                        if(stopService.findByTitle(stop.getTitle()).isPresent()){
+                            stop = stopService.findByTitle(stop.getTitle()).get();
+                        }
                         RouteStatsByStop routeStatsByStop = new RouteStatsByStop();
                         routeStatsByStop.setRouteStatsByIntervalList(new ArrayList<>());
-                        routeStatsByStop.setStop(waypoint.getStop());
+                        routeStatsByStop.setStop(stop);
                         routeStatsByStop.setRouteStatsByDay(routeStatsByDay);
                         for (int j = 0; j < 48; j++) {
                             RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
