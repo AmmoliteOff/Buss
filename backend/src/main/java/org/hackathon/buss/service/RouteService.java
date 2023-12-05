@@ -91,6 +91,8 @@ public class RouteService {
             if(waypoint.getStop()!=null){
                 var stop = stopService.findByTitle(waypoint.getStop().getTitle());
                 stop.ifPresent(waypoint::setStop);
+                waypoint.getStop().setLatitude(waypoint.getLatitude());
+                waypoint.getStop().setLongitude(waypoint.getLongitude());
                 if(stop.isEmpty()){
                     var currentStop = waypoint.getStop();
                     currentStop.setStatsByWeek(new ArrayList<>());

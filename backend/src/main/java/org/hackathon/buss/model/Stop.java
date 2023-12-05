@@ -32,6 +32,9 @@ public class Stop {
     @JsonView({DetailedInformation.class})
     List<StopStatsByDay> statsByWeek;
 
+    private double latitude;
+    private double longitude;
+
     @Override
     public boolean equals(Object stop){
         if(!(stop instanceof Stop c))
