@@ -100,7 +100,7 @@ public class RouteService {
                         for(int j = 0; j<48; j++){
                             var stopStatsByInterval = new StopStatsByInterval();
                             stopStatsByInterval.setStopStatsByDay(stopStats);
-                            stopStatsByInterval.setPeopleCount(random.nextInt(1,50));
+                            stopStatsByInterval.setPeopleCount(random.nextInt(1,20));
                             stopStats.getStopStatsByIntervalList().add(stopStatsByInterval);
                         }
                         currentStop.getStatsByWeek().add(stopStats);
@@ -125,7 +125,7 @@ public class RouteService {
                         for(int j = 0; j<48; j++){
                             var stopStatsByInterval = new StopStatsByInterval();
                             stopStatsByInterval.setStopStatsByDay(stopStats);
-                            stopStatsByInterval.setPeopleCount(random.nextInt(1,50));
+                            stopStatsByInterval.setPeopleCount(random.nextInt(1,20));
                             stopStats.getStopStatsByIntervalList().add(stopStatsByInterval);
                         }
                         currentStop.getStatsByWeek().add(stopStats);

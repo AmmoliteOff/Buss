@@ -165,8 +165,8 @@ public class ScheduleService {
                             Anorm = Math.max(Anorm, INTERVAL / sc.getA().getNormalStep());
                             Bnorm = Math.max(Bnorm, INTERVAL / sc.getB().getNormalStep());
 
-                            Astep = INTERVAL / Anorm;
-                            Bstep = INTERVAL / Bnorm;
+                            Astep = (int) Math.ceil((double) INTERVAL / Anorm);
+                            Bstep = (int) Math.ceil((double) INTERVAL / Bnorm);
                             break;
                         case 2:
                             break;
