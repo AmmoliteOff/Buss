@@ -3,9 +3,11 @@ package org.hackathon.buss.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.enums.Role;
+import org.hackathon.buss.model.Chat;
 import org.hackathon.buss.model.Dispatcher;
 import org.hackathon.buss.model.Driver;
 import org.hackathon.buss.model.User;
+import org.hackathon.buss.service.ChatService;
 import org.hackathon.buss.service.UserService;
 import org.hackathon.buss.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
 
     private final UserService userService;
+    private final ChatService chatService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
@@ -33,18 +36,18 @@ public class AuthenticationService {
                 .build();
 
         if(user.getRole() == Role.DISPATCHER) {
-            user = new Dispatcher(user);
-            userService.save(user);
+            Dispatcher dispatcher = new Dispatcher(user);
+            return getResponse(userService.save(dispatcher));
         } else if (user.getRole() == Role.DRIVER) {
-            user = new Driver(user);
-            userService.save(user);
+            Driver driver = new Driver(user);
+            Chat chat = new Chat();
+            chat.setDriver(driver);
+            User savedUser = userService.save(driver);
+            chatService.save(chat);
+            return getResponse(savedUser);
         }
 
-        var jwtToken = jwtUtil.generateToken(user);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .user(user)
-                .build();
+        return getResponse(user);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -57,6 +60,10 @@ public class AuthenticationService {
                         request.getPassword()
                 )
         );
+        return getResponse(user);
+    }
+
+    public AuthenticationResponse getResponse(User user) {
         var jwtToken = jwtUtil.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)

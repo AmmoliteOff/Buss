@@ -24,7 +24,8 @@ public class Event implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Chat chat;
 
     private LocalDateTime dateTime;
 

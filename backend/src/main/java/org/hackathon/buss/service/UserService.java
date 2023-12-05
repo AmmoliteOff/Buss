@@ -2,7 +2,9 @@ package org.hackathon.buss.service;
 
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.enums.Role;
+import org.hackathon.buss.model.Chat;
 import org.hackathon.buss.model.Dispatcher;
+import org.hackathon.buss.model.Driver;
 import org.hackathon.buss.model.User;
 import org.hackathon.buss.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,10 @@ public class UserService {
     }
 
     public User save(User user) {
+        if(user.getRole().equals(Role.DRIVER)) {
+            Chat chat = new Chat();
+            chat.setDriver((Driver) user);
+        }
         return userRepository.save(user);
     }
 

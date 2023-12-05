@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -19,6 +20,19 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    private List<Message> messages;
+    @ManyToOne
+    @JoinColumn(name = "dispatcher_id")
+    private Dispatcher dispatcher;
+
+    @ManyToOne
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
+
+//    @ManyToOne
+//    @JoinColumn(name = "supervisor_id")
+//    private Supervisor supervisor;
+
+    @OneToMany(mappedBy = "chat")
+    private List<Message> messages = new ArrayList<>();
+
 }
