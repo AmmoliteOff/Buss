@@ -6,6 +6,7 @@ import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
+import org.hackathon.buss.util.RoadStops;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -70,12 +71,12 @@ public class ScheduleService {
                 var oppositeRoute = routeService.findById(route.getOppositeRouteId()).get();
                 skipList.add(oppositeRoute);
                 var sc = new ScheduleConstructor(route, oppositeRoute);
-                for(Bus bus: busService.findByRoute(route)) {
-                    sc.getA_restQueue().add(bus);
-                }
-                for(Bus bus: busService.findByRoute(oppositeRoute)) {
-                    sc.getB_restQueue().add(bus);
-                }
+//                for(Bus bus: busService.findByRoute(route)) {
+//                    sc.getA_restQueue().add(bus);
+//                }
+//                for(Bus bus: busService.findByRoute(oppositeRoute)) {
+//                    sc.getB_restQueue().add(bus);
+//                }
                 scheduleConstructors.add(
                         sc
                 );
@@ -83,10 +84,123 @@ public class ScheduleService {
             }
         }
     }
+    @Scheduled(fixedDelay = 60000)
     private void updateInfo(){
+        LocalDateTime currentTime = LocalDateTime.now();
+        for(ScheduleConstructor sc: scheduleConstructors){
+        var AScheduleRemoveList = new ArrayList<Schedule>();
+        var BScheduleRemoveList = new ArrayList<Schedule>();
+            for (Schedule schedule:
+                    sc.getA().getSchedules()) {
+                if(currentTime.getMinute()+currentTime.getHour()*60 >= schedule.getStartTime().getHour()*60 + schedule.getStartTime().getMinute()){
+                    sc.getA_requestQueue().add(schedule.getStartTime());
+                    AScheduleRemoveList.add(schedule);
+                }
+            }
 
+            for (Schedule schedule:
+                    AScheduleRemoveList) {
+                sc.getA().getSchedules().remove(schedule);
+            }
+
+            for (Schedule schedule:
+                    sc.getB().getSchedules()) {
+                if(currentTime.getMinute()+currentTime.getHour()*60 >= schedule.getStartTime().getHour()*60 + schedule.getStartTime().getMinute()){
+                    sc.getB_requestQueue().add(schedule.getStartTime());
+                    BScheduleRemoveList.add(schedule);
+                }
+            }
+
+            for (Schedule schedule:
+                    BScheduleRemoveList) {
+                sc.getB().getSchedules().remove(schedule);
+            }
+
+            var request = sc.getA_requestQueue().peek();
+            if(request != null) {
+                if (request.getMinute()+request.getHour()*60 <= currentTime.getHour()*60+currentTime.getMinute()){
+                    var bus = findBus(sc, 0);
+                    if (bus != null) {
+                        for (Waypoint waypoint : sc.getA().getWaypoints()) {
+                            if (waypoint.getStop() != null) {
+                                RoadStops roadStops = new RoadStops();
+                                roadStops.setStop(waypoint.getStop());
+                                bus.getRoadStops().add(roadStops);
+                            }
+                        }
+                        bus.setStatus(BusStatus.IN_ROAD);
+                        sc.getA_roadQueue().add(
+                                new RoadEntry(bus,
+                                        currentTime.plusMinutes(
+                                                routeService.getFullTime(sc.getA(),
+                                                        getCurrentDayOfWeek(),
+                                                        getCurrentTimeIntervalInt())
+                                        ))
+                        );
+                        sc.getA_requestQueue().poll();
+                    }
+                }
+            }
+
+            request = sc.getB_requestQueue().peek();
+            if(request != null) {
+                if (request.getMinute()+request.getHour()*60 <= currentTime.getHour()*60+currentTime.getMinute()){
+                    var bus = findBus(sc, 1);
+                    if (bus != null) {
+                        for (Waypoint waypoint : sc.getB().getWaypoints()) {
+                            if (waypoint.getStop() != null) {
+                                RoadStops roadStops = new RoadStops();
+                                roadStops.setStop(waypoint.getStop());
+                                bus.getRoadStops().add(roadStops);
+                            }
+                        }
+                        bus.setStatus(BusStatus.IN_ROAD);
+                        sc.getB_roadQueue().add(
+                                new RoadEntry(bus,
+                                        currentTime.plusMinutes(
+                                                routeService.getFullTime(sc.getB(),
+                                                        getCurrentDayOfWeek(),
+                                                        getCurrentTimeIntervalInt())
+                                        ))
+                        );
+                        sc.getB_requestQueue().poll();
+                    }
+                }
+            }
+        }
+        var a = 0;
     }
 
+
+    private Bus findBus(ScheduleConstructor sc, int type){
+        //0 - A
+        //1 - B
+        Bus result = null;
+        Queue<Bus> restQueue = null;
+
+        switch (type){
+            case 0:
+                restQueue = sc.getA_restQueue();
+                break;
+            case 1:
+                restQueue = sc.getB_restQueue();
+                break;
+        }
+
+        List<Bus> returnList = new ArrayList<>();
+        while(!restQueue.isEmpty()){
+            var bus = restQueue.poll();
+            if(bus.getStatus() == BusStatus.READY) {
+                result = bus;
+                break;
+            }
+            else
+                returnList.add(bus);
+        }
+
+        restQueue.addAll(returnList);
+        return result;
+    }
    private void sendBus(Route route, Queue<LocalDateTime> requestQueue, Queue<Bus> restQueue, Queue<RoadEntry> roadQueue, LocalDateTime time) {
        Schedule schedule = null;
 

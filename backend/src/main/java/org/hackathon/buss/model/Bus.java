@@ -7,8 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hackathon.buss.enums.BusStatus;
+import org.hackathon.buss.util.RoadStops;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -38,6 +41,9 @@ public class Bus {
     @OneToOne
     @JsonIgnore
     private Schedule schedule;
+
+    @Transient
+    private List<RoadStops> roadStops = new ArrayList<>();
 
     private double latitude;
     private double longitude;

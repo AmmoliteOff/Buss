@@ -56,7 +56,7 @@ public class Route {
     private List<RouteChange> changes;
 
     @JsonView(DetailedInformation.class)
-    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RouteStatsByDay> routeStatsByWeek;
 
     @Override

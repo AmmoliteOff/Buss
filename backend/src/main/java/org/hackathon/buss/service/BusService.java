@@ -46,13 +46,5 @@ public class BusService {
             bus.setStatus(BusStatus.READY);
         }
         return save(bus);
-//        if(bus.getStatus() == BusStatus.CHARGING && bus.getCharge() >=80){
-//            bus.setStatus(BusStatus.READY);
-//            bus = save(bus);
-//            scheduleService.returnBus(bus);
-//            return bus;
-//        }
-//        else
-//            return save(bus);
     }
 }

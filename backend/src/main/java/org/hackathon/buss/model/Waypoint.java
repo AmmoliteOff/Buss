@@ -1,10 +1,14 @@
 package org.hackathon.buss.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hackathon.buss.model.stats.WaypointLoadscoreStatsByDay;
 import org.hackathon.buss.util.view.DetailedInformation;
 import org.hackathon.buss.util.view.NonDetailedInformation;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -21,6 +25,10 @@ public class Waypoint {
     @ManyToOne(cascade = CascadeType.ALL)
     @JsonView(NonDetailedInformation.class)
     private Stop stop;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "waypoint", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<WaypointLoadscoreStatsByDay> waypointLoadscoreStatsByDayList;
 
     private int currentLoadScore;
 
