@@ -18,6 +18,6 @@ public class RouteStatsByStop {
     @ManyToOne
     private RouteStatsByDay routeStatsByDay;
 
-    @OneToMany(mappedBy = "routeStatsByStop", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "routeStatsByStop", cascade = CascadeType.ALL)
     private List<RouteStatsByInterval> routeStatsByIntervalList;
 }

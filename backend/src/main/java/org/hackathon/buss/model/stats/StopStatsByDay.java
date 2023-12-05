@@ -22,6 +22,6 @@ public class StopStatsByDay {
     @JsonIgnore
     private Stop stop;
 
-    @OneToMany(mappedBy = "stopStatsByDay", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "stopStatsByDay", cascade = CascadeType.ALL)
     private List<StopStatsByInterval> stopStatsByIntervalList;
 }
