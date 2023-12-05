@@ -1,5 +1,6 @@
 package org.hackathon.buss.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
@@ -8,6 +9,9 @@ import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.model.stats.*;
 import org.hackathon.buss.repository.RouteRepository;
+import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
+import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,7 +29,6 @@ public class RouteService {
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
-
     public List<Route> findAll() {
         return routeRepository.findAll();
     }
@@ -50,7 +53,9 @@ public class RouteService {
                         routeStatsByStop.setRouteStatsByDay(routeStatsByDay);
                         for (int j = 0; j < 48; j++) {
                             RouteStatsByInterval routeStatsByInterval = new RouteStatsByInterval();
-                            routeStatsByInterval.setPeopleGoInBus(random.nextInt(0, 25));
+                            var value = random.nextInt(0, 25);
+                            routeStatsByInterval.setPeopleGoInBus(value);
+                            routeStatsByInterval.setTotalPeopleCount(random.nextInt(value, 40));
                             routeStatsByInterval.setRouteStatsByStop(routeStatsByStop);
                             routeStatsByStop.getRouteStatsByIntervalList().add(routeStatsByInterval);
                         }
@@ -127,8 +132,9 @@ public class RouteService {
     public void delete(Long id) {
         routeRepository.delete(findById(id).orElseThrow());
     }
-
+@Transactional
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
+        route = routeRepository.findById(route.getId()).get();
         int value = 0;
         var dayStats = route.getRouteStatsByWeek().get(dayOfWeek-1);
         for(var routeStatsByStop: dayStats.getRouteStatsByStopList()){
@@ -146,19 +152,21 @@ public class RouteService {
         return distance;
     }
 
+    public void update(Route route){
+        routeRepository.save(route);
+    }
+    @Transactional
     public int getFullTime(Route route, int dayOfWeek, int timeInterval){
+        route = routeRepository.findById(route.getId()).get();
         double time = 0;
         var speed = (BUS_AVERAGE_SPEED/60.0);
         for(int i = 1; i<route.getWaypoints().size(); i++){
-
-            var scoreCoef = route.getWaypoints().get(i)
+        var scoreCoef = route.getWaypoints().get(i)
                     .getWaypointLoadscoreStatsByDayList()
                     .get(dayOfWeek)
                     .getLoadscoreByIntervalList()
                     .get(timeInterval)
                     .getScore()/10 + 1;
-
-
             time+= (DistanceService.calculateDistance(route.getWaypoints().get(i-1), route.getWaypoints().get(i))
             /speed) * scoreCoef;
         }
@@ -180,15 +188,22 @@ public class RouteService {
 
        return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS
     }
-
-    public int getRealNorm(Route route){
+    @Transactional
+    public int getRealNorm(Route route, int timeInterval){
         int value = 0;
-        for (Waypoint waypoint:
-                route.getWaypoints()) {
-            if(waypoint.getStop()!=null){
-                value += integrationService.getPeopleCount(waypoint.getStop()); //STATS PERCENT
+        route = routeRepository.findById(route.getId()).get();
+        var routeStats = route.getRouteStatsByWeek().get(LocalDateTime
+                .now()
+                .getDayOfWeek()
+                .getValue());
+            for(RouteStatsByStop ri : routeStats.getRouteStatsByStopList()){
+               value+= (int) Math.ceil(integrationService.getPeopleCount(ri.getStop()) *
+                       (ri.getRouteStatsByIntervalList()
+                               .get(timeInterval)
+                               .getPeopleGoInBus())/((double)ri.getRouteStatsByIntervalList()
+                       .get(timeInterval)
+                       .getTotalPeopleCount()));
             }
-        }
         var norm = (int) Math.ceil(value/BUS_CAPACITY);
         return Math.max(norm, INTERVAL / route.getNormalStep());
     }

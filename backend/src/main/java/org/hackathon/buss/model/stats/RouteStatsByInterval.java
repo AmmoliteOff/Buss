@@ -14,5 +14,7 @@ public class RouteStatsByInterval {
     @ManyToOne
     private RouteStatsByStop routeStatsByStop;
 
+    private int totalPeopleCount;
+
     private int peopleGoInBus;
 }
