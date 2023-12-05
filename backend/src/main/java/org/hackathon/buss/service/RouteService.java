@@ -32,15 +32,11 @@ public class RouteService {
 
     public List<Route> save(Route route1, Route route2) {
         var result = new ArrayList<Route>();
-        route1.setRouteStatsByWeek(new ArrayList<>());
-        route2.setRouteStatsByWeek(new ArrayList<>());
         Random random = new Random();
 
-        route1.setRouteStatsByWeek(new ArrayList<>());
-        route2.setRouteStatsByWeek(new ArrayList<>());
-
-        for(int i = 0; i<7; i++) {
             if(route1.getRouteStatsByWeek() == null) {
+                route1.setRouteStatsByWeek(new ArrayList<>());
+                for(int i = 0; i<7; i++) {
                 RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
                 routeStatsByDay.setRouteStatsByStopList(new ArrayList<>());
                 routeStatsByDay.setRoute(route1);
@@ -63,8 +59,9 @@ public class RouteService {
             }
         }
 
-        for(int i = 0; i<7; i++) {
             if(route2.getRouteStatsByWeek() == null) {
+                route2.setRouteStatsByWeek(new ArrayList<>());
+                for(int i = 0; i<7; i++) {
                 RouteStatsByDay routeStatsByDay = new RouteStatsByDay();
                 routeStatsByDay.setRouteStatsByStopList(new ArrayList<>());
                 routeStatsByDay.setRoute(route2);
