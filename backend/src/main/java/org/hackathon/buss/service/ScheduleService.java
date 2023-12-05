@@ -6,7 +6,7 @@ import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
-import org.hackathon.buss.util.RoadStops;
+import org.hackathon.buss.model.RoadStops;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -124,19 +124,23 @@ public class ScheduleService {
                         for (Waypoint waypoint : sc.getA().getWaypoints()) {
                             if (waypoint.getStop() != null) {
                                 RoadStops roadStops = new RoadStops();
-                                roadStops.setStop(waypoint.getStop());
+                                roadStops.setWaypoint(waypoint);
+                                roadStops.setBus(bus);
                                 bus.getRoadStops().add(roadStops);
                             }
                         }
                         bus.setStatus(BusStatus.IN_ROAD);
+                        var re = new RoadEntry(bus,
+                                currentTime.plusMinutes(
+                                        routeService.getFullTime(sc.getB(),
+                                                getCurrentDayOfWeek(),
+                                                getCurrentTimeIntervalInt())
+                                ));
+                        re.setBus(bus);
                         sc.getA_roadQueue().add(
-                                new RoadEntry(bus,
-                                        currentTime.plusMinutes(
-                                                routeService.getFullTime(sc.getA(),
-                                                        getCurrentDayOfWeek(),
-                                                        getCurrentTimeIntervalInt())
-                                        ))
+                                re
                         );
+                        busService.save(bus);
                         sc.getA_requestQueue().poll();
                     }
                 }
@@ -150,25 +154,28 @@ public class ScheduleService {
                         for (Waypoint waypoint : sc.getB().getWaypoints()) {
                             if (waypoint.getStop() != null) {
                                 RoadStops roadStops = new RoadStops();
-                                roadStops.setStop(waypoint.getStop());
+                                roadStops.setWaypoint(waypoint);
+                                roadStops.setBus(bus);
                                 bus.getRoadStops().add(roadStops);
                             }
                         }
                         bus.setStatus(BusStatus.IN_ROAD);
+                        var re = new RoadEntry(bus,
+                                currentTime.plusMinutes(
+                                        routeService.getFullTime(sc.getB(),
+                                                getCurrentDayOfWeek(),
+                                                getCurrentTimeIntervalInt())
+                                ));
+                        re.setBus(bus);
                         sc.getB_roadQueue().add(
-                                new RoadEntry(bus,
-                                        currentTime.plusMinutes(
-                                                routeService.getFullTime(sc.getB(),
-                                                        getCurrentDayOfWeek(),
-                                                        getCurrentTimeIntervalInt())
-                                        ))
+                                re
                         );
+                        busService.save(bus);
                         sc.getB_requestQueue().poll();
                     }
                 }
             }
         }
-        var a = 0;
     }
 
 

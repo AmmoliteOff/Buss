@@ -1,13 +1,15 @@
 package org.hackathon.buss.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hackathon.buss.enums.BusStatus;
-import org.hackathon.buss.util.RoadStops;
+import org.hackathon.buss.util.view.DetailedInformation;
+import org.hackathon.buss.util.view.NonDetailedInformation;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "buses")
+@JsonView({NonDetailedInformation.class, DetailedInformation.class})
 public class Bus {
 
     @Id
@@ -42,7 +45,7 @@ public class Bus {
     @JsonIgnore
     private Schedule schedule;
 
-    @Transient
+    @OneToMany(mappedBy = "bus", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RoadStops> roadStops = new ArrayList<>();
 
     private double latitude;

@@ -28,7 +28,7 @@ public class Stop {
     @Column(unique = true)
     private String title;
 
-    @OneToMany(mappedBy = "stop", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "stop", cascade = CascadeType.ALL)
     @JsonView({DetailedInformation.class})
     List<StopStatsByDay> statsByWeek;
 

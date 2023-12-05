@@ -6,6 +6,8 @@ import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.Bus;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.repository.BusRepository;
+import org.hackathon.buss.util.Constants;
+import org.hackathon.buss.model.RoadStops;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,9 +44,36 @@ public class BusService {
         bus.setCharge(busDTO.getCharge());
         bus.setLatitude(busDTO.getLatitude());
         bus.setLongitude(busDTO.getLongitude());
-        if(bus.getStatus() == BusStatus.CHARGING && bus.getCharge() >=80){
-            bus.setStatus(BusStatus.READY);
+        if(busDTO.isCharging())
+            bus.setStatus(BusStatus.CHARGING);
+
+        if(bus.getStatus() == BusStatus.IN_ROAD) {
+            RoadStops nextStop = null;
+            for(int i = 0; i<bus.getRoadStops().size(); i++){
+                if(!bus.getRoadStops().get(i).isReached()){
+                    nextStop = bus.getRoadStops().get(i);
+                    break;
+                }
+            }
+
+            if (Math.pow(bus.getLongitude() - nextStop.getWaypoint().getLongitude(),2) +
+                    Math.pow(bus.getLatitude() - nextStop.getWaypoint().getLatitude(),2) <= Constants.NEAR_RADIUS){
+                int k = 0;
+                for (RoadStops roadStops:
+                        bus.getRoadStops()) {
+                    if(nextStop.getWaypoint().equals(roadStops.getWaypoint())){
+                        roadStops.setReached(true);
+                    }
+                    if(roadStops.isReached())
+                        k++;
+                }
+                if(k == bus.getRoadStops().size()){
+                    bus.setStatus(BusStatus.READY);
+                    //notify schedule??
+                }
+            }
         }
+
         return save(bus);
     }
 }

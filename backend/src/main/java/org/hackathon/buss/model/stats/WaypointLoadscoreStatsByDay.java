@@ -16,6 +16,6 @@ public class WaypointLoadscoreStatsByDay {
     @ManyToOne
     private Waypoint waypoint;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "waypointLoadscoreStatsByDay", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "waypointLoadscoreStatsByDay")
     List<WaypointLoadscoreByInterval> loadscoreByIntervalList;
 }

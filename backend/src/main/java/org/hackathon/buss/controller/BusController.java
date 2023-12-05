@@ -1,9 +1,11 @@
 package org.hackathon.buss.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.model.Bus;
 import org.hackathon.buss.service.BusService;
+import org.hackathon.buss.util.view.NonDetailedInformation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +36,7 @@ public class BusController {
     }
 
     @PatchMapping("/update")
+    @JsonView(NonDetailedInformation.class)
     public  ResponseEntity<Bus> updateBus(@RequestBody BusDTO bus) {
         return ResponseEntity.ok(busService.update(bus));
     }

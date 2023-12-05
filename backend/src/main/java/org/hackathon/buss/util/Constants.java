@@ -8,4 +8,6 @@ public class Constants {
     public final static int FULL_CHARGE_TIME = 60; //MINUTES
 
     public final static int FULL_CHARGE_DISTANCE = 100; //KM
+
+    public final static double NEAR_RADIUS = 0.01;
 }
