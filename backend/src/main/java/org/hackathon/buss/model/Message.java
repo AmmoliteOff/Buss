@@ -29,10 +29,12 @@ public class Message {
 
     @ManyToOne
     @JsonView(NonDetailedInformation.class)
+    @JoinColumn(name = "sender_id")
     private User sender;
 
     @ManyToOne
     @JsonView(NonDetailedInformation.class)
+    @JoinColumn(name = "receiver_id")
     private User receiver;
 
     private String content;
