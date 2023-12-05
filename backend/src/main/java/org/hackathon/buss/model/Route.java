@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hackathon.buss.enums.RouteDirection;
 import org.hackathon.buss.model.stats.RouteStatsByDay;
 import org.hackathon.buss.util.view.DetailedInformation;
 import org.hackathon.buss.util.view.NonDetailedInformation;
@@ -36,6 +37,9 @@ public class Route {
     private String title;
 
     private int normalStep;
+
+    @Enumerated(EnumType.STRING)
+    private RouteDirection direction;
 
     @OneToMany (mappedBy = "route", fetch = FetchType.EAGER,  cascade = CascadeType.ALL)
     @JsonView(NonDetailedInformation.class)

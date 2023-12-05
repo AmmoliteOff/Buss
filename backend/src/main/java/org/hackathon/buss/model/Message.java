@@ -16,13 +16,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "message")
+@Table(name = "messages")
 @JsonView({DetailedInformation.class, NonDetailedInformation.class})
 public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    private Chat chat;
 
     @ManyToOne
     @JsonView(NonDetailedInformation.class)

@@ -12,6 +12,7 @@ import java.util.List;
 
 @Entity
 @Data
+@Table(name = "waypoints")
 @JsonView({NonDetailedInformation.class, DetailedInformation.class})
 public class Waypoint {
     @Id
