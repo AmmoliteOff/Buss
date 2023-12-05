@@ -39,7 +39,7 @@ public class Bus {
 
     @OneToOne
     @JsonIgnore
-    private User busDriver;
+    private Driver busDriver;
 
     @OneToOne
     @JsonIgnore
