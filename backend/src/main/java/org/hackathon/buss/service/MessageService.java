@@ -1,11 +1,7 @@
 package org.hackathon.buss.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
-import org.hackathon.buss.model.Driver;
 import org.hackathon.buss.model.Message;
-import org.hackathon.buss.model.User;
 import org.hackathon.buss.repository.MessageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
