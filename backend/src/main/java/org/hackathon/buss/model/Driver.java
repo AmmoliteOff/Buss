@@ -1,12 +1,10 @@
 package org.hackathon.buss.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hackathon.buss.enums.DriverStatus;
 import org.hackathon.buss.util.view.DetailedInformation;
 
 import java.util.List;
@@ -30,6 +28,9 @@ public class Driver extends User {
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
     @JsonView({DetailedInformation.class})
     private List<Message> messages;
+
+    @Enumerated(EnumType.STRING)
+    private DriverStatus driverStatus;
 
     public Driver() {
 
