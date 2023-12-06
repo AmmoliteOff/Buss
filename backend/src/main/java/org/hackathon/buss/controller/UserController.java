@@ -21,14 +21,6 @@ public class UserController {
 
     private final UserService userService;
 
-    private final RabbitTemplate rabbitTemplate;
-
-    @PostMapping("/register-event")
-    public ResponseEntity<String> registerEvent(@RequestBody Event event) {
-        rabbitTemplate.convertAndSend( "",  "event-registration", event);
-        return ResponseEntity.ok("Ok");
-    }
-
     @GetMapping("/{id}")
     @JsonView({DetailedInformation.class})
     public ResponseEntity<User> getUser(@PathVariable("id") Long userId) {
