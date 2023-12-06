@@ -25,7 +25,6 @@ public class Stop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String title;
 
     @OneToMany(mappedBy = "stop", cascade = CascadeType.ALL)
