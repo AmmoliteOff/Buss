@@ -9,6 +9,6 @@ import java.util.Random;
 public class IntegrationService {
     public int getPeopleCount(Stop stop){
         Random random = new Random();
-        return random.nextInt(1, 50);
+        return random.nextInt(1, 30);
     }
 }

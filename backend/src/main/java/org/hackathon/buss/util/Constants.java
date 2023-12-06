@@ -1,7 +1,7 @@
 package org.hackathon.buss.util;
 
 public class Constants {
-    public final static double BUS_CAPACITY = 25.0;
+    public final static double BUS_CAPACITY = 35.0;
     public final static int INTERVAL = 30; //MINUTES
     public final static int BUS_AVERAGE_SPEED = 40; //KM/H
 
