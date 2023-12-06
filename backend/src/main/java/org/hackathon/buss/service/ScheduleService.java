@@ -29,6 +29,8 @@ public class ScheduleService {
     private final BusService busService;
     private List<ScheduleConstructor> scheduleConstructors;
     private final ScheduleRepository scheduleRepository;
+    private final IntegrationService integrationService;
+
     private int getCurrentTimeIntervalInt() {
         var time = LocalDateTime.now();
         int minute = time.getMinute();
@@ -53,7 +55,7 @@ public class ScheduleService {
         return (int) (minutesSinceMidnight / 30);
     }
 
-    private int getCurrentDayOfWeek(){
+    private int getCurrentDayOfWeek() {
         LocalDateTime now = LocalDateTime.now();
         DayOfWeek dayOfWeek = now.getDayOfWeek();
         return dayOfWeek.getValue();
@@ -129,6 +131,7 @@ public class ScheduleService {
                                 roadStops.setStop(waypoint.getStop());
                                 roadStops.setBus(bus);
                                 roadStops.setOrderInList(k);
+                                waypoint.getStop().setPeopleCount(integrationService.getPeopleCount(waypoint.getStop()));
                                 bus.getRoadStops().add(roadStops);
                                 k++;
                             }
@@ -141,7 +144,7 @@ public class ScheduleService {
                                 currentTime.plusMinutes(
                                         routeService.getFullTime(sc.getB(),
                                                 getCurrentDayOfWeek(),
-                                                getCurrentTimeIntervalInt())
+                                                getCurrentTimeIntervalInt(), 1)
                                 ));
                         re.setBus(bus);
                         sc.getA_roadQueue().add(
@@ -177,7 +180,7 @@ public class ScheduleService {
                                 currentTime.plusMinutes(
                                         routeService.getFullTime(sc.getB(),
                                                 getCurrentDayOfWeek(),
-                                                getCurrentTimeIntervalInt())
+                                                getCurrentTimeIntervalInt(), 1)
                                 ));
                         re.setBus(bus);
                         sc.getB_roadQueue().add(
@@ -264,7 +267,7 @@ public class ScheduleService {
                             schedule.setStartTime(sc.getLastSentA().plusMinutes((long) i *step));
                         else
                             schedule.setStartTime(LocalDateTime.now().plusMinutes((long) i *step));
-                        schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getA(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt())));
+                        schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getA(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt(), 1)));
                         schedule.setRoute(sc.getA());
                         sc.getA().getSchedules().add(schedule);
                     }
@@ -286,7 +289,7 @@ public class ScheduleService {
                         schedule.setStartTime(sc.getLastSentA().plusMinutes((long) i *step));
                     else
                         schedule.setStartTime(LocalDateTime.now().plusMinutes((long) i *step));
-                    schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getB(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt())));
+                    schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getB(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt(), 1)));
                     schedule.setRoute(sc.getB());
                     sc.getB().getSchedules().add(schedule);
                 }
@@ -314,7 +317,7 @@ public class ScheduleService {
                        schedule.setBus(bus);
                        schedule.setEndTime(time.plusMinutes(routeService.getFullTime(route,
                                LocalDateTime.now().getDayOfWeek().getValue(),
-                               getTimeIntervalByDate(time))));
+                               getTimeIntervalByDate(time), 0)));
                        route.getSchedules().add(schedule);
                        roadQueue.add(
                                new RoadEntry(
