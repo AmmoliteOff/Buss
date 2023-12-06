@@ -31,6 +31,7 @@ public class RouteService {
     }
 
     private void createRouteStats(Route route){
+        List<Waypoint> waypoints = waypointService.getAll();
         Random random = new Random();
         if(route.getRouteStatsByWeek() == null) {
             route.setRouteStatsByWeek(new ArrayList<>());
@@ -40,12 +41,14 @@ public class RouteService {
                 routeStatsByDay.setRoute(route);
                 for (Waypoint waypoint : route.getWaypoints()) {
                     if (waypoint.getStop() != null) {
-                        Stop stop;
-                        Optional<Waypoint> waypointDB = waypointService.findByLatitudeAndLongitude(waypoint.getLatitude(), waypoint.getLongitude());
-                        waypointDB.ifPresent(value -> waypoint.setStop(value.getStop()));
-                        if(waypointDB.isPresent()) {
-                            stop = waypointDB.get().getStop();
-                        } else {
+                        Stop stop = null;
+                        for(Waypoint w : waypoints) {
+                            if(Objects.equals(w.getLongitude(), waypoint.getLongitude())
+                                    && Objects.equals(w.getLatitude(), waypoint.getLatitude())) {
+                                stop = w.getStop();
+                            }
+                        }
+                        if(stop == null) {
                             stop = waypoint.getStop();
                         }
                         RouteStatsByStop routeStatsByStop = new RouteStatsByStop();
@@ -69,6 +72,7 @@ public class RouteService {
     }
 
     private void createWaypointAndStopsStats(Route route){
+        List<Waypoint> waypoints = waypointService.getAll();
         Random random = new Random();
         for (Waypoint waypoint:
                 route.getWaypoints()) {
@@ -89,13 +93,15 @@ public class RouteService {
             }
 
             waypoint.setRoute(route);
-            if(waypoint.getStop()!=null){
-//                var stop = stopService.findByTitle(waypoint.getStop().getTitle());
-//                stop.ifPresent(waypoint::setStop);
-//                waypoint.getStop().setLatitude(waypoint.getLatitude());
-//                waypoint.getStop().setLongitude(waypoint.getLongitude());
-                Optional<Waypoint> waypointDB = waypointService.findByLatitudeAndLongitude(waypoint.getLatitude(), waypoint.getLongitude());
-                waypointDB.ifPresent(value -> waypoint.setStop(value.getStop()));
+            if(waypoint.getStop()!=null) {
+                for(Waypoint w : waypoints) {
+                    if(Objects.equals(w.getLongitude(), waypoint.getLongitude())
+                            && Objects.equals(w.getLatitude(), waypoint.getLatitude())) {
+                        waypoint.setStop(w.getStop());
+                        break;
+                    }
+                }
+
                 waypoint.getStop().setLatitude(waypoint.getLatitude());
                 waypoint.getStop().setLongitude(waypoint.getLongitude());
             }
@@ -123,7 +129,7 @@ public class RouteService {
     public void delete(Long id) {
         routeRepository.delete(findById(id).orElseThrow());
     }
-@Transactional
+    @Transactional
     public int getNorm(Route route, int dayOfWeek, int timeInterval){
         route = routeRepository.findById(route.getId()).get();
         int value = 0;
@@ -152,32 +158,32 @@ public class RouteService {
         double time = 0;
         var speed = (BUS_AVERAGE_SPEED/60.0);
         for(int i = 1; i<route.getWaypoints().size(); i++){
-        var scoreCoef = route.getWaypoints().get(i)
+            var scoreCoef = route.getWaypoints().get(i)
                     .getWaypointLoadscoreStatsByDayList()
                     .get(dayOfWeek)
                     .getLoadscoreByIntervalList()
                     .get(timeInterval)
                     .getScore()/10 + 1;
             time+= (DistanceService.calculateDistance(route.getWaypoints().get(i-1), route.getWaypoints().get(i))
-            /speed) * scoreCoef;
+                    /speed) * scoreCoef;
         }
         return (int) time;
     }
     public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
-       double distance = 0;
+        double distance = 0;
 
-       int aIndex = 0;
+        int aIndex = 0;
 
-       while(!route.getWaypoints().get(aIndex).getStop().equals(A)){
-           aIndex++;
-       }
+        while(!route.getWaypoints().get(aIndex).getStop().equals(A)){
+            aIndex++;
+        }
 
         while(!route.getWaypoints().get(aIndex).getStop().equals(B)){
             distance+=DistanceService.calculateDistance(route.getWaypoints().get(aIndex), route.getWaypoints().get(aIndex+1));
             aIndex++;
         }
 
-       return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS
+        return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS
     }
     @Transactional
     public int getRealNorm(Route route, int timeInterval){
@@ -187,14 +193,14 @@ public class RouteService {
                 .now()
                 .getDayOfWeek()
                 .getValue());
-            for(RouteStatsByStop ri : routeStats.getRouteStatsByStopList()){
-               value+= (int) Math.ceil(integrationService.getPeopleCount(ri.getStop()) *
-                       (ri.getRouteStatsByIntervalList()
-                               .get(timeInterval)
-                               .getPeopleGoInBus())/((double)ri.getRouteStatsByIntervalList()
-                       .get(timeInterval)
-                       .getTotalPeopleCount()));
-            }
+        for(RouteStatsByStop ri : routeStats.getRouteStatsByStopList()){
+            value+= (int) Math.ceil(integrationService.getPeopleCount(ri.getStop()) *
+                    (ri.getRouteStatsByIntervalList()
+                            .get(timeInterval)
+                            .getPeopleGoInBus())/((double)ri.getRouteStatsByIntervalList()
+                    .get(timeInterval)
+                    .getTotalPeopleCount()));
+        }
         var norm = (int) Math.ceil(value/BUS_CAPACITY);
         return Math.max(norm, INTERVAL / route.getNormalStep());
     }

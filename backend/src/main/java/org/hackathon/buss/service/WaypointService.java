@@ -5,6 +5,7 @@ import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.repository.WaypointRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,8 +14,8 @@ import java.util.Set;
 public class WaypointService {
     private final WaypointRepository waypointRepository;
 
-    public Set<Waypoint> getAll() {
-        return Set.copyOf(waypointRepository.findAll());
+    public List<Waypoint> getAll() {
+        return waypointRepository.findAll();
     }
 
     public Optional<Waypoint> findByLatitudeAndLongitude(double latitude, double longitude) {
