@@ -1,16 +1,12 @@
 package org.hackathon.buss.service;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleRepository;
 import org.hackathon.buss.model.RoadStops;
 import org.hibernate.Hibernate;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -126,14 +122,18 @@ public class ScheduleService {
                 if (request.getMinute()+request.getHour()*60 <= currentTime.getHour()*60+currentTime.getMinute()){
                     var bus = findBus(sc, 0);
                     if (bus != null) {
+                        int k = 1;
                         for (Waypoint waypoint : sc.getA().getWaypoints()) {
                             if (waypoint.getStop() != null) {
                                 RoadStops roadStops = new RoadStops();
-                                roadStops.setWaypoint(waypoint);
+                                roadStops.setStop(waypoint.getStop());
                                 roadStops.setBus(bus);
+                                roadStops.setOrderInList(k);
                                 bus.getRoadStops().add(roadStops);
+                                k++;
                             }
                         }
+                        bus.setNextStop(sc.getA().getWaypoints().get(0).getStop());
                         sc.setSentA(sc.getSentA()+1);
                         sc.setLastSentA(LocalDateTime.now());
                         bus.setStatus(BusStatus.IN_ROAD);
@@ -158,15 +158,19 @@ public class ScheduleService {
                 if (request.getMinute()+request.getHour()*60 <= currentTime.getHour()*60+currentTime.getMinute()){
                     var bus = findBus(sc, 1);
                     if (bus != null) {
+                        int k = 1;
                         for (Waypoint waypoint : sc.getB().getWaypoints()) {
                             if (waypoint.getStop() != null) {
                                 RoadStops roadStops = new RoadStops();
-                                roadStops.setWaypoint(waypoint);
+                                roadStops.setStop(waypoint.getStop());
                                 roadStops.setBus(bus);
+                                roadStops.setOrderInList(k);
                                 bus.getRoadStops().add(roadStops);
+                                k++;
                             }
                         }
                         bus.setStatus(BusStatus.IN_ROAD);
+                        bus.setNextStop(sc.getB().getWaypoints().get(0).getStop());
                         sc.setSentB(sc.getSentB()+1);
                         sc.setLastSentB(LocalDateTime.now());
                         var re = new RoadEntry(bus,
