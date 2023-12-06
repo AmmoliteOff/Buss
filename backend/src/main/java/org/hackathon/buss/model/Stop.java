@@ -17,11 +17,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "stops")
-@JsonView({NonDetailedInformation.class, DetailedInformation.class})
+@JsonView({ DetailedInformation.class})
 public class Stop {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(NonDetailedInformation.class)
     private Long id;
 
     private String title;
@@ -31,6 +32,9 @@ public class Stop {
 
     private double buildingLatitude;
     private double buildingLongitude;
+
+    @JsonView(NonDetailedInformation.class)
+    private Integer peopleCount;
 
     @Override
     public boolean equals(Object stop){
