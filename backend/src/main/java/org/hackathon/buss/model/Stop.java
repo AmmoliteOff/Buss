@@ -29,6 +29,9 @@ public class Stop {
     private double latitude;
     private double longitude;
 
+    private double buildingLatitude;
+    private double buildingLongitude;
+
     @Override
     public boolean equals(Object stop){
         if(!(stop instanceof Stop c))
