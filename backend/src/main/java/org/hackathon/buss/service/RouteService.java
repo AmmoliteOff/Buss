@@ -2,16 +2,11 @@ package org.hackathon.buss.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.model.Route;
-import org.hackathon.buss.model.RouteChange;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.model.stats.*;
 import org.hackathon.buss.repository.RouteRepository;
-import org.hibernate.Hibernate;
-import org.hibernate.SessionFactory;
-import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,6 +21,7 @@ public class RouteService {
     private final RouteRepository routeRepository;
     private final IntegrationService integrationService;
     private final StopService stopService;
+    private final WaypointService waypointService;
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
@@ -43,9 +39,13 @@ public class RouteService {
                 routeStatsByDay.setRoute(route);
                 for (Waypoint waypoint : route.getWaypoints()) {
                     if (waypoint.getStop() != null) {
-                        var stop = waypoint.getStop();
-                        if(stopService.findByTitle(stop.getTitle()).isPresent()){
-                            stop = stopService.findByTitle(stop.getTitle()).get();
+                        Stop stop;
+                        Optional<Waypoint> waypointDB = waypointService.findByLatitudeAndLongitude(waypoint.getLatitude(), waypoint.getLongitude());
+                        waypointDB.ifPresent(value -> waypoint.setStop(value.getStop()));
+                        if(waypointDB.isPresent()) {
+                            stop = waypointDB.get().getStop();
+                        } else {
+                            stop = waypoint.getStop();
                         }
                         RouteStatsByStop routeStatsByStop = new RouteStatsByStop();
                         routeStatsByStop.setRouteStatsByIntervalList(new ArrayList<>());
@@ -89,26 +89,14 @@ public class RouteService {
 
             waypoint.setRoute(route);
             if(waypoint.getStop()!=null){
-                var stop = stopService.findByTitle(waypoint.getStop().getTitle());
-                stop.ifPresent(waypoint::setStop);
+//                var stop = stopService.findByTitle(waypoint.getStop().getTitle());
+//                stop.ifPresent(waypoint::setStop);
+//                waypoint.getStop().setLatitude(waypoint.getLatitude());
+//                waypoint.getStop().setLongitude(waypoint.getLongitude());
+                Optional<Waypoint> waypointDB = waypointService.findByLatitudeAndLongitude(waypoint.getLatitude(), waypoint.getLongitude());
+                waypointDB.ifPresent(value -> waypoint.setStop(value.getStop()));
                 waypoint.getStop().setLatitude(waypoint.getLatitude());
                 waypoint.getStop().setLongitude(waypoint.getLongitude());
-                if(stop.isEmpty()){
-                    var currentStop = waypoint.getStop();
-                    currentStop.setStatsByWeek(new ArrayList<>());
-                    for(int i = 0; i<7; i++){
-                        var stopStats = new StopStatsByDay();
-                        stopStats.setStopStatsByIntervalList(new ArrayList<>());
-                        stopStats.setStop(currentStop);
-                        for(int j = 0; j<48; j++){
-                            var stopStatsByInterval = new StopStatsByInterval();
-                            stopStatsByInterval.setStopStatsByDay(stopStats);
-                            stopStatsByInterval.setPeopleCount(random.nextInt(1,20));
-                            stopStats.getStopStatsByIntervalList().add(stopStatsByInterval);
-                        }
-                        currentStop.getStatsByWeek().add(stopStats);
-                    }
-                }
             }
         }
     }
