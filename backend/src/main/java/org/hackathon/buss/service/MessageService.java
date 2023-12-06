@@ -1,10 +1,14 @@
 package org.hackathon.buss.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.hackathon.buss.model.Driver;
 import org.hackathon.buss.model.Message;
+import org.hackathon.buss.model.User;
 import org.hackathon.buss.repository.MessageRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -14,13 +18,11 @@ import java.time.LocalDateTime;
 public class MessageService {
 
     private final MessageRepository messageRepository;
-    private final UserService userService;
-    private final ChatService chatService;
 
+
+    @Transactional
     public Message save(Message message){
-        Driver driver = new Driver(userService.findById(message.getSender().getId()).orElseThrow());
         message.setSendAt(LocalDateTime.now());
-        message.setChat(chatService.findByDriver(driver).orElseThrow());
         return messageRepository.save(message);
     }
 }
