@@ -220,7 +220,7 @@ public class ScheduleService {
 
     }
     private void checkRealTimeSituation(){
-        var currentInterval = getCurrentTimeInterval();
+        var currentInterval = getCurrentTimeInterval().plusMinutes(INTERVAL);
         for (ScheduleConstructor sc:
              scheduleConstructors) {
             boolean changes = false;
@@ -230,7 +230,7 @@ public class ScheduleService {
             List<Schedule> ASchudules = new ArrayList<>();
 
             for (Schedule schedule: sc.getA().getSchedules()){
-                if(schedule.getStartTime().getMinute() + schedule.getStartTime().getHour()*60 >= currentInterval.getHour()*60 + currentInterval.getMinute()){
+                if(schedule.getStartTime().getMinute() + schedule.getStartTime().getHour()*60 <= currentInterval.getHour()*60 + currentInterval.getMinute()){
                     ASchudules.add(schedule);
                 }
             }
@@ -269,7 +269,6 @@ public class ScheduleService {
             if(Math.abs(Bnorm - sc.getSentB() - BSchudules.size()) > 1){
                 int needToSent = Bnorm - sc.getSentB();
                 int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
-
                 for (Schedule schedule : BSchudules) {
                     schedule.setRoute(null);
                     scheduleRepository.save(schedule);

@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hackathon.buss.model.stats.StopStatsByDay;
 import org.hackathon.buss.util.view.DetailedInformation;
 import org.hackathon.buss.util.view.NonDetailedInformation;
 
@@ -27,10 +26,6 @@ public class Stop {
 
     @Column(unique = true)
     private String title;
-
-    @OneToMany(mappedBy = "stop", cascade = CascadeType.ALL)
-    @JsonView({DetailedInformation.class})
-    List<StopStatsByDay> statsByWeek;
 
     private double latitude;
     private double longitude;
