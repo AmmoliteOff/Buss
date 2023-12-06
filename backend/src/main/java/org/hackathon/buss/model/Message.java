@@ -24,15 +24,15 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Chat chat;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JsonView(NonDetailedInformation.class)
     @JoinColumn(name = "sender_id")
     private User sender;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JsonView(NonDetailedInformation.class)
     @JoinColumn(name = "receiver_id")
     private User receiver;
