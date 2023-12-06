@@ -33,8 +33,4 @@ public class Schedule {
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-
-    @OneToMany(mappedBy = "schedule", fetch = FetchType.EAGER)
-    @OrderBy("time ASC")
-    private List<ScheduleEntry> scheduleEntries = new ArrayList<>();
 }

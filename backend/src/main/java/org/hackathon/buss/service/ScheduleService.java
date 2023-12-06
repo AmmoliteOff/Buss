@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
-import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
 import org.hackathon.buss.model.RoadStops;
 import org.hibernate.Hibernate;
@@ -32,7 +31,6 @@ public class ScheduleService {
     private final BusService busService;
     private List<ScheduleConstructor> scheduleConstructors;
     private final ScheduleRepository scheduleRepository;
-    private final ScheduleEntryReposirory scheduleEntryReposirory;
     private int getCurrentTimeIntervalInt() {
         var time = LocalDateTime.now();
         int minute = time.getMinute();
@@ -82,8 +80,7 @@ public class ScheduleService {
             }
         }
     }
-    //@Scheduled(fixedDelay = 60000)
-    @Scheduled(fixedDelay = 6000)
+    @Scheduled(fixedDelay = 60000)
     private void updateInfo(){
         checkRealTimeSituation();
         LocalDateTime currentTime = LocalDateTime.now();
@@ -251,6 +248,8 @@ public class ScheduleService {
                 int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
 
                     for (Schedule schedule : ASchudules) {
+                        schedule.setRoute(null);
+                        scheduleRepository.save(schedule);
                         sc.getA().getSchedules().remove(schedule);
                     }
                     for(int i = 0; i<Math.abs(needToSent); i++){
@@ -260,9 +259,11 @@ public class ScheduleService {
                         else
                             schedule.setStartTime(LocalDateTime.now().plusMinutes((long) i *step));
                         schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getA(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt())));
+                        schedule.setRoute(sc.getA());
                         sc.getA().getSchedules().add(schedule);
                     }
                 changes = true;
+                routeService.update(sc.getA());
             }
 
             if(Math.abs(Bnorm - sc.getSentB() - BSchudules.size()) > 1){
@@ -270,6 +271,8 @@ public class ScheduleService {
                 int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
 
                 for (Schedule schedule : BSchudules) {
+                    schedule.setRoute(null);
+                    scheduleRepository.save(schedule);
                     sc.getB().getSchedules().remove(schedule);
                 }
                 for(int i = 0; i<Math.abs(needToSent); i++){
@@ -279,9 +282,11 @@ public class ScheduleService {
                     else
                         schedule.setStartTime(LocalDateTime.now().plusMinutes((long) i *step));
                     schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getB(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt())));
+                    schedule.setRoute(sc.getB());
                     sc.getB().getSchedules().add(schedule);
                 }
                 changes = true;
+                routeService.update(sc.getB());
             }
             if(changes)
                 predictor();
