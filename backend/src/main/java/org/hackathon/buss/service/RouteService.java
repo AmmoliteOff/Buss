@@ -207,20 +207,27 @@ public class RouteService {
 
     public int getAlmostRealWaypointToStopTime(Route route, PosDTO waypointCoords, Stop B){
         double distance = 0;
-        int waypointIndex = 0;
+        Waypoint waypoint = null;
         double distanceToWaypoint = 10000;
         for(int i = 0; i<route.getWaypoints().size(); i++){
             var dist = Math.sqrt(Math.pow((waypointCoords.getLatitude() - route.getWaypoints().get(i).getLatitude()),2) + Math.pow((waypointCoords.getLongitude() - route.getWaypoints().get(i).getLongitude()),2));
             if(dist<distanceToWaypoint){
                 distanceToWaypoint = dist;
-                waypointIndex = i;
+                waypoint = route.getWaypoints().get(i);
             }
         }
-        var waypoint = route.getWaypoints().get(waypointIndex);
-        while(waypoint.getStop().equals(B)){
-            distance+= DistanceService.calculateDistance(waypoint, route.getWaypoints().get(waypointIndex+1));
-            waypointIndex++;
-            waypoint = route.getWaypoints().get(waypointIndex);
+
+        boolean flag = false;
+
+        for(int i = 0; i<route.getWaypoints().size(); i++){
+            if(route.getWaypoints().get(i).equals(waypoint))
+                flag = true;
+
+            if(route.getWaypoints().get(i).getStop()!=null && route.getWaypoints().get(i).getStop().equals(B))
+                flag = false;
+
+            if(flag)
+                distance+= DistanceService.calculateDistance(route.getWaypoints().get(i), route.getWaypoints().get(i+1));
         }
 
         return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS

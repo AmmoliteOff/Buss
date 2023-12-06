@@ -8,14 +8,15 @@ import org.hackathon.buss.model.Bus;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.repository.BusRepository;
-import org.hackathon.buss.util.Constants;
+import org.hackathon.buss.repository.RoadStopsRepository;
 import org.hackathon.buss.model.RoadStops;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.hackathon.buss.util.Constants.NEAR_RADIUS;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class BusService {
 
     private final BusRepository busRepository;
     private final RouteService routeService;
+    private final RoadStopsRepository roadStopsRepository;
     //private final ScheduleService scheduleService;
 
     public Optional<Bus> findById(long id) {
@@ -53,39 +55,35 @@ public class BusService {
             bus.setStatus(BusStatus.CHARGING);
 
         if(bus.getStatus() == BusStatus.IN_ROAD) {
-            RoadStops nextStop = null;
-            for(int i = 0; i<bus.getRoadStops().size(); i++){
-                if(!bus.getRoadStops().get(i).isReached()){
-                    nextStop = bus.getRoadStops().get(i);
-                    break;
-                }
-            }
-
-            if (Math.pow(bus.getLongitude() - nextStop.getWaypoint().getLongitude(),2) +
-                    Math.pow(bus.getLatitude() - nextStop.getWaypoint().getLatitude(),2) <= Constants.NEAR_RADIUS){
+            if(Math.pow(bus.getNextStop().getLatitude()-busDTO.getLatitude(),2) +
+                    Math.pow(bus.getNextStop().getLongitude()-busDTO.getLongitude(),2) <= NEAR_RADIUS){
                 int k = 0;
-                for (RoadStops roadStops:
-                        bus.getRoadStops()) {
-                    if(nextStop.getWaypoint().equals(roadStops.getWaypoint())){
-                        roadStops.setReached(true);
-                        bus.setNextStop(nextStop.getWaypoint().getStop());
-                        for(int i = 0; i<bus.getRoadStops().size(); i++){
-                            if(!bus.getRoadStops().get(i).isReached()){
-                                nextStop = bus.getRoadStops().get(i);
-                                break;
-                            }
+                boolean flag = true;
+
+                while(flag){
+                    if(!bus.getRoadStops().get(k).isReached()){
+                        bus.getRoadStops().get(k).setReached(true);
+                        flag = false;
+                    }
+                    k++;
+                }
+
+                k = 0;
+                flag = true;
+                RoadStops rs = roadStopsRepository.findByStop(bus.getNextStop());
+                while(flag){
+                    if(!bus.getRoadStops().get(k).isReached()){
+                        if(bus.getRoadStops().get(k).getOrderInList() == rs.getOrderInList()+1) {
+                            bus.setNextStop(bus.getRoadStops().get(k).getStop());
+                            flag = false;
                         }
                     }
-                    if(roadStops.isReached())
-                        k++;
+                    k++;
                 }
-                if(k == bus.getRoadStops().size()){
-                    bus.setStatus(BusStatus.READY);
-                    //notify schedule??
-                }
+                if(k == bus.getRoadStops().size())
+                    bus.setRoadStops(new ArrayList<>());
             }
         }
-
         return save(bus);
     }
 
@@ -99,6 +97,7 @@ public class BusService {
                 busDTO.setBusId(bus.getId());
                 busDTO.setLongitude(bus.getLongitude());
                 busDTO.setLatitude(bus.getLatitude());
+                busDTO.setCharge(bus.getCharge());
                 busDTO.setRouteTitle(bus.getRoute().getTitle());
                 var position = new PosDTO();
                 position.setLongitude(bus.getNextStop().getLongitude());
@@ -110,6 +109,7 @@ public class BusService {
                                 stop
                         )
                 );
+                result.add(busDTO);
             }
         }
         return result;

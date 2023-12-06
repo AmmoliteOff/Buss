@@ -46,6 +46,7 @@ public class Bus {
     private Schedule schedule;
 
     @OneToMany(mappedBy = "bus", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonView(DetailedInformation.class)
     private List<RoadStops> roadStops = new ArrayList<>();
 
     private double latitude;
@@ -53,7 +54,7 @@ public class Bus {
 
     private LocalDateTime nextCharge;
 
-    @Transient
+    @OneToOne
     private Stop nextStop;
 
     @Override
