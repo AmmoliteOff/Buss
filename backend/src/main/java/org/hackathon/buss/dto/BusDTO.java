@@ -9,4 +9,6 @@ public class BusDTO {
     private double longitude;
     private double latitude;
     private boolean isCharging = false;
+    private int minutesToNextStop;
+    private String routeTitle;
 }

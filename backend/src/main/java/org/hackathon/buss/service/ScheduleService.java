@@ -3,12 +3,14 @@ package org.hackathon.buss.service;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleRepository;
 import org.hackathon.buss.model.RoadStops;
 import org.hibernate.Hibernate;
 import org.springframework.cglib.core.Local;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 

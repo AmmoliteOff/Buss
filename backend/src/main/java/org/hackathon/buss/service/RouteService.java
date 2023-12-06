@@ -2,6 +2,7 @@ package org.hackathon.buss.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hackathon.buss.dto.PosDTO;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
@@ -198,18 +199,22 @@ public class RouteService {
         return Math.max(norm, INTERVAL / route.getNormalStep());
     }
 
-    public int getAlmostRealStopToStopTime(Route route, Stop A, Stop B){
+    public int getAlmostRealWaypointToStopTime(Route route, PosDTO waypointCoords, Stop B){
         double distance = 0;
-
-        int aIndex = 0;
-
-        while(!route.getWaypoints().get(aIndex).getStop().equals(A)){
-            aIndex++;
+        int waypointIndex = 0;
+        double distanceToWaypoint = 10000;
+        for(int i = 0; i<route.getWaypoints().size(); i++){
+            var dist = Math.sqrt(Math.pow((waypointCoords.getLatitude() - route.getWaypoints().get(i).getLatitude()),2) + Math.pow((waypointCoords.getLongitude() - route.getWaypoints().get(i).getLongitude()),2));
+            if(dist<distanceToWaypoint){
+                distanceToWaypoint = dist;
+                waypointIndex = i;
+            }
         }
-
-        while(!route.getWaypoints().get(aIndex).getStop().equals(B)){
-            distance+=DistanceService.calculateDistance(route.getWaypoints().get(aIndex), route.getWaypoints().get(aIndex+1));
-            aIndex++;
+        var waypoint = route.getWaypoints().get(waypointIndex);
+        while(waypoint.getStop().equals(B)){
+            distance+= DistanceService.calculateDistance(waypoint, route.getWaypoints().get(waypointIndex+1));
+            waypointIndex++;
+            waypoint = route.getWaypoints().get(waypointIndex);
         }
 
         return (int) Math.ceil(distance/(BUS_AVERAGE_SPEED/60.0)); //ADD COEFS

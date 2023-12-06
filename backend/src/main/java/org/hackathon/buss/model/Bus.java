@@ -53,6 +53,9 @@ public class Bus {
 
     private LocalDateTime nextCharge;
 
+    @Transient
+    private Stop nextStop;
+
     @Override
     public boolean equals(Object other){
         if(!(other instanceof Bus c))

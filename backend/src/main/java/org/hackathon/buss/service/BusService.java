@@ -2,14 +2,18 @@ package org.hackathon.buss.service;
 
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
+import org.hackathon.buss.dto.PosDTO;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.Bus;
 import org.hackathon.buss.model.Route;
+import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.repository.BusRepository;
 import org.hackathon.buss.util.Constants;
 import org.hackathon.buss.model.RoadStops;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +22,7 @@ import java.util.Optional;
 public class BusService {
 
     private final BusRepository busRepository;
+    private final RouteService routeService;
     //private final ScheduleService scheduleService;
 
     public Optional<Bus> findById(long id) {
@@ -63,6 +68,13 @@ public class BusService {
                         bus.getRoadStops()) {
                     if(nextStop.getWaypoint().equals(roadStops.getWaypoint())){
                         roadStops.setReached(true);
+                        bus.setNextStop(nextStop.getWaypoint().getStop());
+                        for(int i = 0; i<bus.getRoadStops().size(); i++){
+                            if(!bus.getRoadStops().get(i).isReached()){
+                                nextStop = bus.getRoadStops().get(i);
+                                break;
+                            }
+                        }
                     }
                     if(roadStops.isReached())
                         k++;
@@ -75,5 +87,31 @@ public class BusService {
         }
 
         return save(bus);
+    }
+
+    public List<BusDTO> getNearBuses(Stop stop) {
+        var buses = busRepository.findAll();
+        var result = new ArrayList<BusDTO>();
+        for (Bus bus:
+             buses) {
+            if(bus.getNextStop()!=null && bus.getNextStop().equals(stop)){
+                var busDTO = new BusDTO();
+                busDTO.setBusId(bus.getId());
+                busDTO.setLongitude(bus.getLongitude());
+                busDTO.setLatitude(bus.getLatitude());
+                busDTO.setRouteTitle(bus.getRoute().getTitle());
+                var position = new PosDTO();
+                position.setLongitude(bus.getNextStop().getLongitude());
+                position.setLatitude(bus.getNextStop().getLatitude());
+                busDTO.setMinutesToNextStop(
+                        routeService.getAlmostRealWaypointToStopTime(
+                                bus.getRoute(),
+                                position,
+                                stop
+                        )
+                );
+            }
+        }
+        return result;
     }
 }

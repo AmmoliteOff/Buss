@@ -1,8 +1,11 @@
 package org.hackathon.buss.service;
 
 import lombok.RequiredArgsConstructor;
+import org.hackathon.buss.dto.PosDTO;
 import org.hackathon.buss.model.Stop;
+import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.repository.StopRepository;
+import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +34,25 @@ public class StopService {
         stopRepository.delete(findById(id).orElseThrow());
     }
 
+    public Stop findByPos(PosDTO posDTO){
+        Stop closestStop = null;
+        var stops = stopRepository.findAll();
+        var minDistance = 100000.0;
+        for(Stop stop: stops){
+            var wa = new Waypoint();
+            var wb = new Waypoint();
+            wa.setLatitude(posDTO.getLatitude());
+            wa.setLongitude(posDTO.getLongitude());
+            wb.setLongitude(stop.getLongitude());
+            wb.setLatitude(stop.getLatitude());
+            var distance = DistanceService.calculateDistance(wa, wb);
+                if(distance<minDistance){
+                    minDistance = distance;
+                    closestStop = stop;
+                }
+            }
+        return closestStop;
+    }
     public Stop update(Long id, Stop newStop) {
         newStop.setId(id);
         return save(newStop);
