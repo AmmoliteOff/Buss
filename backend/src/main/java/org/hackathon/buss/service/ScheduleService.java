@@ -1,12 +1,15 @@
 package org.hackathon.buss.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.hackathon.buss.enums.BusStatus;
 import org.hackathon.buss.model.*;
 import org.hackathon.buss.repository.ScheduleEntryReposirory;
 import org.hackathon.buss.repository.ScheduleRepository;
 import org.hackathon.buss.model.RoadStops;
+import org.hibernate.Hibernate;
+import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +38,7 @@ public class ScheduleService {
         int minute = time.getMinute();
         int roundedMinute = minute - minute % 30;
 
-        var c = time.withMinute(roundedMinute).withSecond(0).withNano(0);
+        var c = time.withMinute(roundedMinute).withSecond(0).withNano(0).plusMinutes(INTERVAL);
         var minutes = c.getHour()*60+c.getMinute();
         return minutes/ INTERVAL;
     }
@@ -51,7 +54,7 @@ public class ScheduleService {
     private int getTimeIntervalByDate(LocalDateTime dateTime){
         LocalTime midnight = LocalTime.MIDNIGHT;
         long minutesSinceMidnight = ChronoUnit.MINUTES.between(midnight, dateTime.toLocalTime());
-        return (int) (minutesSinceMidnight / 30) + 1;
+        return (int) (minutesSinceMidnight / 30);
     }
 
     private int getCurrentDayOfWeek(){
@@ -67,16 +70,11 @@ public class ScheduleService {
         var skipList = new ArrayList<Route>();
         for (Route route:
              routes) {
+            Hibernate.initialize(route);
             if(!skipList.contains(route)) {
                 var oppositeRoute = routeService.findById(route.getOppositeRouteId()).get();
                 skipList.add(oppositeRoute);
                 var sc = new ScheduleConstructor(route, oppositeRoute);
-//                for(Bus bus: busService.findByRoute(route)) {
-//                    sc.getA_restQueue().add(bus);
-//                }
-//                for(Bus bus: busService.findByRoute(oppositeRoute)) {
-//                    sc.getB_restQueue().add(bus);
-//                }
                 scheduleConstructors.add(
                         sc
                 );
@@ -84,10 +82,18 @@ public class ScheduleService {
             }
         }
     }
-    @Scheduled(fixedDelay = 60000)
+    //@Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 6000)
     private void updateInfo(){
+        checkRealTimeSituation();
         LocalDateTime currentTime = LocalDateTime.now();
         for(ScheduleConstructor sc: scheduleConstructors){
+
+            if(currentTime.getMinute()%30 == 0){
+                sc.setSentA(0);
+                sc.setSentB(0);
+            }
+
         var AScheduleRemoveList = new ArrayList<Schedule>();
         var BScheduleRemoveList = new ArrayList<Schedule>();
             for (Schedule schedule:
@@ -129,6 +135,8 @@ public class ScheduleService {
                                 bus.getRoadStops().add(roadStops);
                             }
                         }
+                        sc.setSentA(sc.getSentA()+1);
+                        sc.setLastSentA(LocalDateTime.now());
                         bus.setStatus(BusStatus.IN_ROAD);
                         var re = new RoadEntry(bus,
                                 currentTime.plusMinutes(
@@ -160,6 +168,8 @@ public class ScheduleService {
                             }
                         }
                         bus.setStatus(BusStatus.IN_ROAD);
+                        sc.setSentB(sc.getSentB()+1);
+                        sc.setLastSentB(LocalDateTime.now());
                         var re = new RoadEntry(bus,
                                 currentTime.plusMinutes(
                                         routeService.getFullTime(sc.getB(),
@@ -207,6 +217,75 @@ public class ScheduleService {
 
         restQueue.addAll(returnList);
         return result;
+    }
+
+    private void predictor(){
+
+    }
+    private void checkRealTimeSituation(){
+        var currentInterval = getCurrentTimeInterval();
+        for (ScheduleConstructor sc:
+             scheduleConstructors) {
+            boolean changes = false;
+            var Anorm = routeService.getRealNorm(sc.getA(), getCurrentTimeIntervalInt());
+            var Bnorm = routeService.getRealNorm(sc.getA(), getCurrentTimeIntervalInt());
+            var currentTime = LocalDateTime.now();
+            List<Schedule> ASchudules = new ArrayList<>();
+
+            for (Schedule schedule: sc.getA().getSchedules()){
+                if(schedule.getStartTime().getMinute() + schedule.getStartTime().getHour()*60 >= currentInterval.getHour()*60 + currentInterval.getMinute()){
+                    ASchudules.add(schedule);
+                }
+            }
+
+            List<Schedule> BSchudules = new ArrayList<>();
+
+            for (Schedule schedule: sc.getB().getSchedules()){
+                if(schedule.getStartTime().getMinute() + schedule.getStartTime().getHour()*60 <= currentInterval.getHour()*60 + currentInterval.getMinute()){
+                    BSchudules.add(schedule);
+                }
+            }
+
+            if(Math.abs(Anorm - sc.getSentA() - ASchudules.size()) > 1){
+                int needToSent = Anorm - sc.getSentA();
+                int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
+
+                    for (Schedule schedule : ASchudules) {
+                        sc.getA().getSchedules().remove(schedule);
+                    }
+                    for(int i = 0; i<Math.abs(needToSent); i++){
+                        var schedule = new Schedule();
+                        if(sc.getSentA() != 0)
+                            schedule.setStartTime(sc.getLastSentA().plusMinutes((long) i *step));
+                        else
+                            schedule.setStartTime(LocalDateTime.now().plusMinutes((long) i *step));
+                        schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getA(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt())));
+                        sc.getA().getSchedules().add(schedule);
+                    }
+                changes = true;
+            }
+
+            if(Math.abs(Bnorm - sc.getSentB() - BSchudules.size()) > 1){
+                int needToSent = Bnorm - sc.getSentB();
+                int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
+
+                for (Schedule schedule : BSchudules) {
+                    sc.getB().getSchedules().remove(schedule);
+                }
+                for(int i = 0; i<Math.abs(needToSent); i++){
+                    var schedule = new Schedule();
+                    if(sc.getSentB() != 0)
+                        schedule.setStartTime(sc.getLastSentA().plusMinutes((long) i *step));
+                    else
+                        schedule.setStartTime(LocalDateTime.now().plusMinutes((long) i *step));
+                    schedule.setEndTime(schedule.getStartTime().plusMinutes(routeService.getFullTime(sc.getB(), LocalDateTime.now().getDayOfWeek().getValue(), getCurrentTimeIntervalInt())));
+                    sc.getB().getSchedules().add(schedule);
+                }
+                changes = true;
+            }
+            if(changes)
+                predictor();
+        }
     }
    private void sendBus(Route route, Queue<LocalDateTime> requestQueue, Queue<Bus> restQueue, Queue<RoadEntry> roadQueue, LocalDateTime time) {
        Schedule schedule = null;
@@ -365,13 +444,15 @@ public class ScheduleService {
 
                 time = time.plusMinutes(1);
             }
-            routeService.save(sc.getA(), sc.getB());
+            routeService.update(sc.getA());
+            routeService.update(sc.getB());
         }
         for (Bus bus:
                 busService.findAll()) {
             bus.setSchedule(null);
             busService.save(bus);
         }
+        init();
     }
 
 }

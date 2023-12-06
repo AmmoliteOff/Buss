@@ -14,6 +14,12 @@ public class ScheduleConstructor {
     private LocalDateTime start;
     private LocalDateTime end;
 
+    private int sentA = 0;
+    private int sentB = 0;
+
+    private LocalDateTime lastSentA;
+    private LocalDateTime lastSentB;
+
     private Queue<LocalDateTime> A_requestQueue = new ArrayDeque<LocalDateTime>();
     private Queue<LocalDateTime> B_requestQueue = new ArrayDeque<LocalDateTime>();
 
