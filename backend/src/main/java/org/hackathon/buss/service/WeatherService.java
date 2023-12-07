@@ -1,5 +1,6 @@
 package org.hackathon.buss.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.hackathon.buss.dto.WeatherDTO;
 import org.hackathon.buss.enums.WeatherCondition;
@@ -18,6 +19,16 @@ import java.net.URI;
 public class WeatherService {
 
     private Weather weather;
+
+
+
+    @PostConstruct
+    private void init(){
+        var wt = new Weather();
+        wt.setWeatherCondition(WeatherCondition.CLEAR);
+        wt.setTemp(10);
+        weather = wt;
+    }
 
     //@Scheduled(fixedDelay = 1000 * 60 * 30)
     private void updateWeather() {

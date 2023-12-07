@@ -29,7 +29,7 @@ public class WebSocketController {
     @MessageMapping("/sendMessage/{id}")
     @SendTo("/topic/sendMessage/{id}")
     public Message sendMessage(@DestinationVariable Long id, Message messageRequest) {
-
+        return null;
     }
 
     @MessageMapping("/sendEvent/{id}")
