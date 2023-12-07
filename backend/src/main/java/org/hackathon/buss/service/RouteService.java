@@ -3,9 +3,11 @@ package org.hackathon.buss.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.PosDTO;
+import org.hackathon.buss.enums.WeatherCondition;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
+import org.hackathon.buss.model.Weather;
 import org.hackathon.buss.model.stats.*;
 import org.hackathon.buss.repository.RouteRepository;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,9 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
     private final IntegrationService integrationService;
-    private final StopService stopService;
     private final WaypointService waypointService;
+    private final WeatherService weatherService;
+
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
@@ -71,9 +74,8 @@ public class RouteService {
         }
     }
 
-    private void createWaypointAndStopsStats(Route route){
+    private void createWaypointAndStopsStats(Route route) {
         List<Waypoint> waypoints = waypointService.getAll();
-        Random random = new Random();
         for (Waypoint waypoint:
                 route.getWaypoints()) {
 
@@ -84,16 +86,17 @@ public class RouteService {
                 waypointStatsByDay.setLoadscoreByIntervalList(new ArrayList<>());
                 waypointStatsByDay.setWaypoint(waypoint);
                 for(int j = 0; j < 48; j++){
-                    var waipointStatsByIntreval = new WaypointLoadscoreByInterval();
-                    waipointStatsByIntreval.setWaypointLoadscoreStatsByDay(waypointStatsByDay);
-                    waipointStatsByIntreval.setScore(random.nextInt(0,10));
-                    waypointStatsByDay.getLoadscoreByIntervalList().add(waipointStatsByIntreval);
+                    var waypointStatsByInterval = new WaypointLoadscoreByInterval();
+                    waypointStatsByInterval.setWaypointLoadscoreStatsByDay(waypointStatsByDay);
+                    waypointStatsByInterval.setScore(integrationService.getScore(route));
+                    waypointStatsByDay.getLoadscoreByIntervalList().add(waypointStatsByInterval);
                 }
                 waypoint.getWaypointLoadscoreStatsByDayList().add(waypointStatsByDay);
             }
 
             waypoint.setRoute(route);
             if(waypoint.getStop()!=null) {
+                waypoint.getStop().setPeopleCount(integrationService.getPeopleCount());
                 for(Waypoint w : waypoints) {
                     if(Objects.equals(w.getLongitude(), waypoint.getLongitude())
                             && Objects.equals(w.getLatitude(), waypoint.getLatitude())) {
@@ -153,22 +156,54 @@ public class RouteService {
         routeRepository.save(route);
     }
     @Transactional
-    public int getFullTime(Route route, int dayOfWeek, int timeInterval){
+    public int getFullTime(Route route, int dayOfWeek, int timeInterval, int type){
         route = routeRepository.findById(route.getId()).get();
         double time = 0;
         var speed = (BUS_AVERAGE_SPEED/60.0);
         for(int i = 1; i<route.getWaypoints().size(); i++){
-            var scoreCoef = route.getWaypoints().get(i)
+            time+= (DistanceService.calculateDistance(route.getWaypoints().get(i-1), route.getWaypoints().get(i))
+                    /speed);
+        }
+        switch (type) {
+            case 0: time = getStatTime(time, route, dayOfWeek, timeInterval);break;
+            case 1: time = getRealTime(time, route);break;
+            default: break;
+        }
+        return (int) time;
+    }
+
+    private int getRealTime(double time, Route route) {
+        Weather weather = weatherService.getCurrentWeather();
+        var weatherCoeff = 1;
+        if(weather.getWeatherCondition().equals(WeatherCondition.CLEAR)) {
+            weatherCoeff*= 1;
+        } else if(weather.getWeatherCondition().equals(WeatherCondition.OVERCAST)) {
+            weatherCoeff *= 1.2;
+        } else if(weather.getWeatherCondition().equals(WeatherCondition.RAIN)) {
+            weatherCoeff *= 1.5;
+        } else if(weather.getWeatherCondition().equals(WeatherCondition.SNOW)) {
+            weatherCoeff *= 1.8;
+        } else {
+            weatherCoeff *= 1.3;
+        }
+        return (int) (time * weatherCoeff * integrationService.getScore(route)/10 + 1);
+    }
+
+    private int getStatTime(double time, Route route, int dayOfWeek, int timeInterval) {
+        var score = 0;
+        for(int i = 1; i<route.getWaypoints().size(); i++){
+            score += route.getWaypoints().get(i)
                     .getWaypointLoadscoreStatsByDayList()
                     .get(dayOfWeek)
                     .getLoadscoreByIntervalList()
                     .get(timeInterval)
-                    .getScore()/10 + 1;
-            time+= (DistanceService.calculateDistance(route.getWaypoints().get(i-1), route.getWaypoints().get(i))
-                    /speed) * scoreCoef;
+                    .getScore();
         }
-        return (int) time;
+        var scoreCoeff = score/route.getWaypoints().size()/10 + 1;
+        return (int) (time * 1.3 * scoreCoeff);
     }
+
+
     public int getAverageStopToStopTime(int time, Route route, Stop A, Stop B){
         double distance = 0;
 
@@ -194,7 +229,7 @@ public class RouteService {
                 .getDayOfWeek()
                 .getValue());
         for(RouteStatsByStop ri : routeStats.getRouteStatsByStopList()){
-            value+= (int) Math.ceil(integrationService.getPeopleCount(ri.getStop()) *
+            value+= (int) Math.ceil(ri.getStop().getPeopleCount() *
                     (ri.getRouteStatsByIntervalList()
                             .get(timeInterval)
                             .getPeopleGoInBus())/((double)ri.getRouteStatsByIntervalList()

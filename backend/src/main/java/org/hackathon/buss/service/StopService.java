@@ -5,7 +5,6 @@ import org.hackathon.buss.dto.PosDTO;
 import org.hackathon.buss.model.Stop;
 import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.repository.StopRepository;
-import org.hackathon.buss.util.Constants;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +17,8 @@ public class StopService {
 
     private final StopRepository stopRepository;
 
+    private final IntegrationService integrationService;
+
     public Optional<Stop> findById(long id) {
         return stopRepository.findById(id);
     }
@@ -27,6 +28,7 @@ public class StopService {
     }
 
     public Stop save(Stop stop) {
+        stop.setPeopleCount(integrationService.getPeopleCount());
         return stopRepository.save(stop);
     }
 
