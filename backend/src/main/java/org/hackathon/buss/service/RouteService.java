@@ -10,6 +10,7 @@ import org.hackathon.buss.model.Waypoint;
 import org.hackathon.buss.model.Weather;
 import org.hackathon.buss.model.stats.*;
 import org.hackathon.buss.repository.RouteRepository;
+import org.hackathon.buss.repository.StopRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,8 @@ public class RouteService {
     private final WaypointService waypointService;
     private final WeatherService weatherService;
 
+    private final StopRepository stopRepository;
+
     public Optional<Route> findById(long id) {
         return routeRepository.findById(id);
     }
@@ -33,7 +36,7 @@ public class RouteService {
         return routeRepository.findAll();
     }
 
-    private void createRouteStats(Route route){
+    private void createRouteStats(Route route) {
         List<Waypoint> waypoints = waypointService.getAll();
         Random random = new Random();
         if(route.getRouteStatsByWeek() == null) {
@@ -81,7 +84,7 @@ public class RouteService {
 
             waypoint.setWaypointLoadscoreStatsByDayList(new ArrayList<>());
 
-            for(int i = 0; i<7;i++){
+            for(int i = 0; i<7; i++) {
                 var waypointStatsByDay = new WaypointLoadscoreStatsByDay();
                 waypointStatsByDay.setLoadscoreByIntervalList(new ArrayList<>());
                 waypointStatsByDay.setWaypoint(waypoint);
@@ -93,10 +96,12 @@ public class RouteService {
                 }
                 waypoint.getWaypointLoadscoreStatsByDayList().add(waypointStatsByDay);
             }
-
             waypoint.setRoute(route);
             if(waypoint.getStop()!=null) {
                 waypoint.getStop().setPeopleCount(integrationService.getPeopleCount());
+                if(waypoint.getStop().getId() != null) {
+                    waypoint.setStop(stopRepository.findById(waypoint.getStop().getId()).get());
+                }
                 for(Waypoint w : waypoints) {
                     if(Objects.equals(w.getLongitude(), waypoint.getLongitude())
                             && Objects.equals(w.getLatitude(), waypoint.getLatitude())) {
@@ -118,6 +123,7 @@ public class RouteService {
 
         createWaypointAndStopsStats(route1);
         createWaypointAndStopsStats(route2);
+
 
         var r1= routeRepository.save(route1);
         route2.setOppositeRouteId(r1.getId());
