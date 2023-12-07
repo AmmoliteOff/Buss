@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "stops")
-@JsonView({ DetailedInformation.class})
+@JsonView({DetailedInformation.class})
 public class Stop {
 
     @Id
