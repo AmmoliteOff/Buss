@@ -24,7 +24,7 @@ public class Chat {
     @JoinColumn(name = "dispatcher_id")
     private Dispatcher dispatcher;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "driver_id")
     private Driver driver;
 

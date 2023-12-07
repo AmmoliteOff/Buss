@@ -32,6 +32,9 @@ public class Driver extends User {
     @Enumerated(EnumType.STRING)
     private DriverStatus driverStatus;
 
+    @OneToOne(mappedBy = "driver")
+    private Chat chat;
+
     public Driver() {
 
     }

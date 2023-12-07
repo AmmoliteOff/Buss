@@ -32,9 +32,9 @@ public class Dispatcher extends User{
     @JsonView({DetailedInformation.class})
     private List<Event> events;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    @JsonView({DetailedInformation.class})
-    private List<Message> messages;
+    @OneToMany(mappedBy = "dispatcher")
+    private List<Chat> chat;
+
     public Dispatcher() {
 
     }
