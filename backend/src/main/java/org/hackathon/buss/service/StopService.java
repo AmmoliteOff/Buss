@@ -74,7 +74,7 @@ public class StopService {
         Stop stop = findById(stopId).orElse(null);
         Route route = routeService.findById(routeId).orElseThrow();
         int dayOfWeek = LocalDateTime.now().getDayOfWeek().getValue();
-        RouteStatsByDay routeStatsByDay = routeStatsByDayService.findByRoute(route, dayOfWeek * routeId).orElseThrow();
+        RouteStatsByDay routeStatsByDay = routeStatsByDayService.findByRoute(route, dayOfWeek + 7 * (routeId-1)).orElseThrow();
         List<RouteStatsByStop>  routeStatsByStopList = routeStatsByDay.getRouteStatsByStopList();
         List<RouteStatsByInterval> routeStatsByIntervalList = null;
         for (RouteStatsByStop routeStatsByStop : routeStatsByStopList) {
