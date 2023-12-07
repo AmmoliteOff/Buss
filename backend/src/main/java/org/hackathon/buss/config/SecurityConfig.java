@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests()
-//                .requestMatchers("/api/register", "/api/authenticate",  "/api/acceptOrder")
+//                .requestMatchers("/api/login")
 //                .permitAll()
                 .anyRequest()
 //                .authenticated()

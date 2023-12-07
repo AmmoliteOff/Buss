@@ -30,9 +30,6 @@ public class Waypoint {
     @JsonIgnore
     @OneToMany(mappedBy = "waypoint", cascade = CascadeType.ALL)
     private List<WaypointLoadscoreStatsByDay> waypointLoadscoreStatsByDayList;
-
-    private int currentLoadScore;
-
     private double longitude;
     private double latitude;
 

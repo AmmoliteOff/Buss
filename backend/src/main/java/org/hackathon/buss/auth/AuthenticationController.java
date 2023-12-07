@@ -21,7 +21,7 @@ public class AuthenticationController {
                 String.valueOf(response.getToken())).body(response.getUser());
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticate(
             @RequestBody AuthenticationRequest request) {
         AuthenticationResponse response = authenticationService.authenticate(request);
