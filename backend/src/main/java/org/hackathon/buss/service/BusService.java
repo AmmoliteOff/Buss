@@ -1,5 +1,6 @@
 package org.hackathon.buss.service;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.dto.PosDTO;
@@ -19,7 +20,7 @@ import java.util.Optional;
 import static org.hackathon.buss.util.Constants.NEAR_RADIUS;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class BusService {
 
     private final BusRepository busRepository;
@@ -51,6 +52,7 @@ public class BusService {
         bus.setCharge(busDTO.getCharge());
         bus.setLatitude(busDTO.getLatitude());
         bus.setLongitude(busDTO.getLongitude());
+        bus.setCharge(busDTO.getCharge());
         if(busDTO.isCharging())
             bus.setStatus(BusStatus.CHARGING);
 
@@ -70,7 +72,13 @@ public class BusService {
 
                 k = 0;
                 flag = true;
-                RoadStops rs = roadStopsRepository.findByStop(bus.getNextStop());
+                RoadStops rs = null;
+                for (RoadStops rsl:
+                        roadStopsRepository.findAllByBus(bus)){
+                    if(rsl.getStop().equals(bus.getNextStop()))
+                        rs = rsl;
+                }
+
                 while(flag){
                     if(!bus.getRoadStops().get(k).isReached()){
                         if(bus.getRoadStops().get(k).getOrderInList() == rs.getOrderInList()+1) {

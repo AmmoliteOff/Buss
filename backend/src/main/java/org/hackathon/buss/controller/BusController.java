@@ -35,7 +35,7 @@ public class BusController {
         return ResponseEntity.ok(busService.save(bus));
     }
 
-    @PatchMapping("/update")
+    @PostMapping("/update")
     @JsonView(NonDetailedInformation.class)
     public  ResponseEntity<Bus> updateBus(@RequestBody BusDTO bus) {
         return ResponseEntity.ok(busService.update(bus));
