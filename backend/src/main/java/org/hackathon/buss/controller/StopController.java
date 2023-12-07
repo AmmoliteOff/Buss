@@ -1,11 +1,13 @@
 package org.hackathon.buss.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
 import org.hackathon.buss.dto.PosDTO;
+import org.hackathon.buss.dto.StopDTO;
 import org.hackathon.buss.model.Stop;
-import org.hackathon.buss.service.BusService;
-import org.hackathon.buss.service.StopService;
+import org.hackathon.buss.service.*;
+import org.hackathon.buss.util.view.NonDetailedInformation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,9 +34,18 @@ public class StopController {
     }
 
     @GetMapping("")
+    @JsonView(NonDetailedInformation.class)
     public ResponseEntity<List<Stop>> getAllStops() {
         List<Stop> stops = stopService.findAll();
         return ResponseEntity.ok(stops);
+    }
+
+    @GetMapping("/{stopId}/{routeId}")
+    @JsonView(NonDetailedInformation.class)
+    public ResponseEntity<StopDTO> getStop(@PathVariable("stopId") String stopId, @PathVariable("routeId") String routeId ) {
+        StopDTO stopDTO = stopService.getInfo(Long.parseLong(stopId), Long.parseLong(routeId));
+        return ResponseEntity.ok(stopDTO);
+
     }
 
     @PostMapping()
