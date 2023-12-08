@@ -31,6 +31,16 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final IntegrationService integrationService;
 
+    public List<Schedule> findAllSchedules(){
+        var all = scheduleRepository.findAll();
+        List<Schedule> result = new ArrayList<>();
+        for (Schedule schedule:
+             all) {
+            if(schedule.getBus()!=null)
+                result.add(schedule);
+        }
+        return result;
+    }
     private int getCurrentTimeIntervalInt() {
         var time = LocalDateTime.now();
         int minute = time.getMinute();
@@ -252,7 +262,7 @@ public class ScheduleService {
                 }
             }
 
-            if(Math.abs(Anorm - sc.getSentA() - ASchudules.size()) > 1){
+            if(Math.abs(Anorm - sc.getSentA() - ASchudules.size()) > 1 && !ASchudules.isEmpty()){
                 int needToSent = Anorm - sc.getSentA();
                 int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
 
@@ -275,7 +285,7 @@ public class ScheduleService {
                 routeService.update(sc.getA());
             }
 
-            if(Math.abs(Bnorm - sc.getSentB() - BSchudules.size()) > 1){
+            if(Math.abs(Bnorm - sc.getSentB() - BSchudules.size()) > 1&& !ASchudules.isEmpty()){
                 int needToSent = Bnorm - sc.getSentB();
                 int step = (INTERVAL-((currentTime.getMinute())>30?currentTime.getMinute()-30:currentTime.getMinute()))/Math.abs(needToSent);
                 for (Schedule schedule : BSchudules) {
