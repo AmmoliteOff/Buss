@@ -3,11 +3,7 @@ package org.hackathon.buss.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.enums.Role;
-import org.hackathon.buss.model.Chat;
-import org.hackathon.buss.model.Dispatcher;
-import org.hackathon.buss.model.Driver;
-import org.hackathon.buss.model.User;
-import org.hackathon.buss.service.ChatService;
+import org.hackathon.buss.model.*;
 import org.hackathon.buss.service.UserService;
 import org.hackathon.buss.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
 
     private final UserService userService;
-    private final ChatService chatService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
@@ -35,16 +30,19 @@ public class AuthenticationService {
                 .role(request.getUserRole())
                 .build();
 
-        if(user.getRole() == Role.DISPATCHER) {
+        if(user.getRole().equals(Role.DISPATCHER)) {
             Dispatcher dispatcher = new Dispatcher(user);
             return getResponse(userService.save(dispatcher));
-        } else if (user.getRole() == Role.DRIVER) {
+        } else if (user.getRole().equals(Role.DRIVER)) {
             Driver driver = new Driver(user);
             Chat chat = new Chat();
             chat.setDriver(driver);
+            driver.setChat(chat);
             User savedUser = userService.save(driver);
-            chatService.save(chat);
             return getResponse(savedUser);
+        } else if(user.getRole().equals(Role.SUPERVISOR)) {
+            Supervisor supervisor = new Supervisor(user);
+            return getResponse(userService.save(supervisor));
         }
 
         return getResponse(user);
