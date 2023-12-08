@@ -1,10 +1,10 @@
 package org.hackathon.buss.model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hackathon.buss.util.view.DetailedInformation;
+import org.hackathon.buss.util.view.NonDetailedInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "chats")
+@JsonView({DetailedInformation.class, NonDetailedInformation.class})
 public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,17 +23,20 @@ public class Chat {
 
     @ManyToOne
     @JoinColumn(name = "dispatcher_id")
+    @JsonView(DetailedInformation.class)
     private Dispatcher dispatcher;
 
     @OneToOne
     @JoinColumn(name = "driver_id")
+    @JsonView(DetailedInformation.class)
     private Driver driver;
 
-//    @ManyToOne
-//    @JoinColumn(name = "supervisor_id")
-//    private Supervisor supervisor;
+    @ManyToOne
+    @JoinColumn(name = "supervisor_id")
+    @JsonView(DetailedInformation.class)
+    private Supervisor supervisor;
 
-    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chat", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
 }
