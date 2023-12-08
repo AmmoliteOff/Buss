@@ -27,14 +27,13 @@ public class EventService {
         return eventRepository.findById(id);
     }
 
-    @Transactional
-    public Event save(Event event) {
+    public void save(Event event) {
         if(event.getId() == null) {
             Dispatcher dispatcher = userService.findMinLoadedDispatcher();
             event.setDateTime(LocalDateTime.now());
             dispatcher.getEvents().add(event);
             event.setDispatcher(dispatcher);
-            Chat chat = chatService.findByDriver(event.getDriver()).orElseThrow();
+            Chat chat = chatService.findByDriver(event.getDriver()).get();
             chat.setDispatcher(dispatcher);
             Message message = new Message();
             message.setContent(event.getType().name());
@@ -43,8 +42,10 @@ public class EventService {
             message.setReceiver(dispatcher);
             message.setSendAt(LocalDateTime.now());
             chat.getMessages().add(message);
-            event.setChat(chat);
+            Chat savedChat = chatService.save(chat);
+            dispatcher.getChat().add(savedChat);
+            event.setChat(savedChat);
         }
-        return eventRepository.save(event);
+        eventRepository.save(event);
     }
 }

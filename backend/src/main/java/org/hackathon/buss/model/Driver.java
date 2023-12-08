@@ -1,13 +1,10 @@
 package org.hackathon.buss.model;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hackathon.buss.enums.DriverStatus;
-import org.hackathon.buss.util.view.DetailedInformation;
 
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -25,14 +22,10 @@ public class Driver extends User {
         this.setUsername(user.getUsername());
     }
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
-    @JsonView({DetailedInformation.class})
-    private List<Message> messages;
-
     @Enumerated(EnumType.STRING)
     private DriverStatus driverStatus;
 
-    @OneToOne(mappedBy = "driver")
+    @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL)
     private Chat chat;
 
     public Driver() {

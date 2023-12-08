@@ -33,8 +33,9 @@ public class EventController {
     public ResponseEntity<?> processAnEvent (@RequestBody Event event) {
         Event processedEvent = eventService.findById(event.getId()).orElseThrow();
         processedEvent.setProcessed(true);
-        event.setDispatcher(null);
-        return ResponseEntity.ok(eventService.save(processedEvent));
+        processedEvent.setDispatcher(null);
+        eventService.save(processedEvent);
+        return ResponseEntity.ok(processedEvent);
     }
 
     @GetMapping("")

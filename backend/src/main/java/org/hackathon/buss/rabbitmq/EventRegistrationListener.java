@@ -21,6 +21,6 @@ public class EventRegistrationListener {
     @JsonView(NonDetailedInformation.class)
     public void onEventRegistration(Event event) throws InterruptedException {
         Thread.sleep(3000);
-        log.info("Event Registration Received: {}", eventService.save(event));
+        log.info("Event Registration Received");
     }
 }

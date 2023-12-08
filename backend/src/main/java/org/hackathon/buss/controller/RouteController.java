@@ -3,7 +3,6 @@ package org.hackathon.buss.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.hackathon.buss.dto.BusDTO;
-import org.hackathon.buss.dto.RouteChangeDTO;
 import org.hackathon.buss.dto.RouteDTO;
 import org.hackathon.buss.model.Route;
 import org.hackathon.buss.service.BusService;
